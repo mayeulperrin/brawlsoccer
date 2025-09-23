@@ -6,7 +6,7 @@ set -e
 
 # Configuration - MODIFIEZ CES VALEURS
 SERVER_USER="invidia"  
-SERVER_HOST="brawlsoccer.com"
+SERVER_HOST="imay.fr"
 SERVER_PORT="22"
 DOMAIN="brawlsoccer.com"
 

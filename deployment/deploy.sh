@@ -74,9 +74,19 @@ if [ -d "$APP_DIR/node_modules" ]; then
     cp -r $APP_DIR ${APP_DIR}_backup_$(date +%Y%m%d_%H%M%S)
 fi
 
-# Copier les fichiers de l'application (à adapter selon votre méthode de transfert)
-log "Copiez maintenant vos fichiers dans $APP_DIR"
-log "Vous pouvez utiliser: rsync, scp, git clone, etc."
+# Copier les fichiers de l'application
+log "📋 Fichiers nécessaires à copier dans $APP_DIR:"
+echo "   • server.js (serveur Node.js)"
+echo "   • package.json (dépendances)"
+echo "   • dist/ ou public/ (frontend compilé)"
+echo "   • public/medias/ (sons du jeu)"
+echo "   • deployment/ (configurations)"
+echo ""
+log "💡 Commandes recommandées depuis votre machine locale:"
+echo "   scp -r server.js package.json dist/ public/medias/ deployment/ root@brawlsoccer.com:$APP_DIR/"
+echo "   ou"
+echo "   rsync -avz --progress server.js package.json dist/ public/medias/ deployment/ root@brawlsoccer.com:$APP_DIR/"
+echo ""
 
 # Attendre la confirmation
 read -p "Appuyez sur [Enter] une fois que les fichiers sont copiés dans $APP_DIR..."

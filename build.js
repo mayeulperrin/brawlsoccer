@@ -31,13 +31,18 @@ function copyRecursiveSync(src, dest) {
     }
 }
 
-// Fonction pour minifier le HTML
+// Fonction pour minifier le HTML (SANS casser le JavaScript inline)
 function minifyHTML(content) {
     return content
-        .replace(/\s+/g, ' ')
+        // Préserver le contenu des balises <script>
+        .replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gi, (match, scriptContent) => {
+            // Ne pas minifier le contenu JavaScript inline
+            return match;
+        })
+        // Minifier seulement le HTML, pas le JS
         .replace(/>\s+</g, '><')
-        .replace(/\s+>/g, '>')
-        .replace(/<\s+/g, '<')
+        .replace(/\s*\n\s*/g, ' ')
+        .replace(/\s{2,}/g, ' ')
         .trim();
 }
 
@@ -53,18 +58,14 @@ function minifyCSS(content) {
         .trim();
 }
 
-// Fonction pour minifier le JavaScript (basique)
+// Fonction pour minifier le JavaScript (SÉCURISÉE)
 function minifyJS(content) {
     return content
         .replace(/\/\*[\s\S]*?\*\//g, '') // Supprimer commentaires multilignes
         .replace(/\/\/.*$/gm, '') // Supprimer commentaires une ligne
-        .replace(/\s+/g, ' ') // Réduire espaces
-        .replace(/;\s*}/g, '}') // Nettoyer accolades
-        .replace(/\s*{\s*/g, '{')
-        .replace(/\s*;\s*/g, ';')
-        .replace(/\s*,\s*/g, ',')
-        .replace(/\s*\(\s*/g, '(')
-        .replace(/\s*\)\s*/g, ')')
+        .replace(/\n\s*/g, '\n') // Préserver les sauts de ligne essentiels
+        .replace(/\s{2,}/g, ' ') // Réduire espaces multiples mais pas tous
+        .replace(/;\s*\n/g, ';\n') // Préserver structure après point-virgule
         .trim();
 }
 
@@ -97,13 +98,19 @@ try {
     fs.mkdirSync(path.join(buildDir, 'public'));
 
     // Traiter index.html
-    console.log('  - index.html (minifié)');
+    console.log('  - index.html (optimisé)');
     const htmlContent = fs.readFileSync(path.join(sourceDir, 'index.html'), 'utf8');
-    const minifiedHTML = minifyHTML(htmlContent);
-    fs.writeFileSync(path.join(buildDir, 'public', 'index.html'), minifiedHTML);
+    
+    // Pour la production, on copie tel quel pour éviter les problèmes
+    // La minification agressive peut casser le JavaScript inline
+    const optimizedHTML = htmlContent
+        .replace(/\s*\n\s*/g, '\n') // Nettoyer les sauts de ligne
+        .replace(/\t/g, '  '); // Remplacer tabs par espaces
+    
+    fs.writeFileSync(path.join(buildDir, 'public', 'index.html'), optimizedHTML);
 
     // Traiter les fichiers JavaScript
-    console.log('  - Fichiers JavaScript (minifiés)');
+    console.log('  - Fichiers JavaScript (optimisés)');
     const jsDir = path.join(sourceDir, 'js');
     const jsOutputDir = path.join(buildDir, 'public', 'js');
     fs.mkdirSync(jsOutputDir);
@@ -112,8 +119,14 @@ try {
         if (path.extname(file) === '.js') {
             console.log(`    - ${file}`);
             const jsContent = fs.readFileSync(path.join(jsDir, file), 'utf8');
-            const minifiedJS = minifyJS(jsContent);
-            fs.writeFileSync(path.join(jsOutputDir, file), minifiedJS);
+            
+            // Minification légère pour préserver la fonctionnalité
+            const optimizedJS = jsContent
+                .replace(/\/\*[\s\S]*?\*\//g, '') // Supprimer commentaires bloc
+                .replace(/\/\/.*$/gm, '') // Supprimer commentaires ligne
+                .replace(/^\s*\n/gm, ''); // Supprimer lignes vides
+            
+            fs.writeFileSync(path.join(jsOutputDir, file), optimizedJS);
         }
     });
 
@@ -136,6 +149,15 @@ try {
             fs.copyFileSync(libPath, path.join(buildDir, 'public', lib));
         }
     });
+
+    // Copier le favicon
+    console.log('  - favicon.svg');
+    if (fs.existsSync(path.join(sourceDir, 'favicon.svg'))) {
+        fs.copyFileSync(
+            path.join(sourceDir, 'favicon.svg'),
+            path.join(buildDir, 'public', 'favicon.svg')
+        );
+    }
 
     // Créer un script de démarrage
     console.log('📋 Création des scripts...');
