@@ -106,6 +106,14 @@ class UIManager {
         this.showConnectionStatus('Connexion en cours...', 'info');
     }
 
+    // NOUVEAU: Méthode pour annuler le timeout de connexion
+    clearConnectionTimeout() {
+        if (this.connectionTimeout) {
+            clearTimeout(this.connectionTimeout);
+            this.connectionTimeout = null;
+        }
+    }
+
     // Afficher/masquer les écrans
     showLoginScreen() {
         this.elements.loginScreen.classList.remove('hidden');
@@ -174,8 +182,23 @@ class UIManager {
         }, 200);
     }
 
-    // Liste des joueurs
+    // Liste des joueurs - Optimisation du cooldown pour plus de réactivité
     updatePlayersList(players) {
+        const now = Date.now();
+        
+        // OPTIMISATION: Réduire encore le cooldown à 15ms pour plus de fluidité
+        if (this.lastPlayersUpdate && (now - this.lastPlayersUpdate) < 15) {
+            return;
+        }
+        
+        // Nouveau système de hash simple
+        const currentHash = this.generatePlayersHash(players);
+        if (this.lastPlayersHash === currentHash) {
+            return; // Pas de changement, pas de mise à jour
+        }
+        
+        this.lastPlayersHash = currentHash;
+        this.lastPlayersUpdate = now;
         
         this.elements.playersContent.innerHTML = '';
         
@@ -218,6 +241,30 @@ class UIManager {
         this.elements.playersContent.appendChild(statusDiv);
     }
 
+    // OPTIMISATION: Cache pour éviter les recalculs de hash
+    generatePlayersHash(players) {
+        let hash = 0;
+        
+        // Trier par ID pour consistance
+        const sortedPlayers = players.slice().sort((a, b) => a.id.localeCompare(b.id));
+        
+        for (let player of sortedPlayers) {
+            // OPTIMISATION: Tranches de santé plus larges pour réduire les changements
+            const healthBracket = Math.floor(player.health / 10) * 10; // 10% au lieu de 5%
+            const playerString = `${player.id}_${player.name}_${player.team}_${healthBracket}_${player.isKnockedOut ? 1 : 0}_${player.giveKOCount || 0}_${player.receiveKOCount || 0}`;
+            
+            // Hash simple mais efficace
+            for (let i = 0; i < playerString.length; i++) {
+                const char = playerString.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convertir en 32 bits
+            }
+        }
+        
+        hash += players.length * 1000;
+        return hash;
+    }
+
     addPlayerToList(player) {
         const playerDiv = document.createElement('div');
         playerDiv.style.cssText = 'margin: 5px 0; padding: 5px; background: rgba(255, 255, 255, 0.1); border-radius: 5px; font-size: 14px;';
@@ -232,6 +279,7 @@ class UIManager {
         const isLocal = player.id === networkManager.playerId;
         const nameStyle = isLocal ? 'font-weight: bold; text-decoration: underline;' : '';
         
+        // OPTIMISATION: Utiliser template literals plus efficace
         playerDiv.innerHTML = `
             <div style="${nameStyle}">
                 ${statusIcon} ${player.name} ${isLocal ? '(Vous)' : ''}

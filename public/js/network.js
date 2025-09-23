@@ -9,7 +9,7 @@ class NetworkManager {
         // Buffers pour optimiser les envois
         this.lastMovementSent = 0;
         this.movementBuffer = null;
-        this.movementCooldown = 50; // ms entre les envois de mouvement
+        this.movementCooldown = 50; // Revenir à 50ms
         
         this.init();
     }
@@ -33,6 +33,7 @@ class NetworkManager {
         this.socket.on('connect', () => {
             this.connected = true;
             console.log('✅ Connecté au serveur');
+            uiManager.clearConnectionTimeout(); // Annuler le timeout
             uiManager.showConnectionStatus('Connecté au serveur', 'success');
         });
 
@@ -40,6 +41,7 @@ class NetworkManager {
         this.socket.on('disconnect', (reason) => {
             this.connected = false;
             console.log('❌ Déconnecté du serveur:', reason);
+            uiManager.clearConnectionTimeout(); // Annuler le timeout
             uiManager.showConnectionStatus('Connexion perdue', 'error');
             uiManager.showLoginScreen();
         });
@@ -47,7 +49,8 @@ class NetworkManager {
         // Erreur de connexion
         this.socket.on('connect_error', (error) => {
             console.error('Erreur de connexion:', error);
-            uiManager.showConnectionStatus('Erreur de connexion', 'error');
+            uiManager.clearConnectionTimeout(); // Annuler le timeout
+            uiManager.showConnectionStatus('Erreur de connexion au serveur', 'error');
         });
 
         // Joueur rejoint avec succès
@@ -56,6 +59,10 @@ class NetworkManager {
             this.playerTeam = data.team;
             
             console.log(`🎮 Joueur rejoint - ID: ${this.playerId}, Équipe: ${this.playerTeam}`);
+            
+            // Annuler le timeout et cacher le statut de connexion
+            uiManager.clearConnectionTimeout();
+            uiManager.hideConnectionStatus();
             
             // Configurer le jeu
             game.setLocalPlayerId(this.playerId);
@@ -72,67 +79,34 @@ class NetworkManager {
 
         // Partie pleine
         this.socket.on('game-full', () => {
+            uiManager.clearConnectionTimeout(); // Annuler le timeout
             uiManager.showConnectionStatus('Partie complète, réessayez plus tard', 'warning');
         });
 
-        // Mise à jour de l'état du jeu
+        // Pseudo déjà pris ou invalide
+        this.socket.on('join-error', (error) => {
+            uiManager.clearConnectionTimeout(); // Annuler le timeout
+            uiManager.showConnectionStatus(error.message || 'Erreur de connexion', 'error');
+        });
+
+        // Mise à jour de l'état du jeu - RETOUR SIMPLE
         this.socket.on('game-update', (gameState) => {
             game.updateGameState(gameState);
             uiManager.updateScore(gameState.score);
             uiManager.updatePlayersList(gameState.players);
         });
 
-        // Mise à jour des joueurs
+        // Mise à jour des joueurs - RETOUR SIMPLE
         this.socket.on('player-update', (gameState) => {
             game.updateGameState(gameState);
             uiManager.updatePlayersList(gameState.players);
         });
 
-        // Joueur a quitté
-        this.socket.on('player-left', (playerId) => {
-            console.log(`👋 Joueur ${playerId} a quitté la partie`);
-        });
-
-        // Partie démarrée
-        this.socket.on('game-started', () => {
-            console.log('🚀 Partie démarrée !');
-            game.showGameMessage('🚀 La partie commence !', 2000);
-            uiManager.showGameStarted();
-        });
-
-        // Partie arrêtée
-        this.socket.on('game-stopped', () => {
-            console.log('⏹️ Partie arrêtée');
-            game.showGameMessage('⏹️ Partie arrêtée - Pas assez de joueurs');
-            uiManager.showGameStopped();
-        });
-
-        // Action de joueur (coup de poing, coup de pied, etc.)
-        this.socket.on('player-action', (data) => {
-            if (data.action === 'punch') {
-                game.animatePunch(data.playerId);
-                
-                // Effet visuel
-                this.showActionEffect(data.position, '👊');
-            } else if (data.action === 'kick') {
-                // Animation de coup de pied
-                const playerGroup = game.players.get(data.playerId);
-                if (playerGroup) {
-                    game.animatePlayerKick(playerGroup, Math.random() > 0.5);
-                }
-                
-                // Effet visuel
-                this.showActionEffect(data.position, '🦶');
-            }
-        });
-
-        // Joueur touché
+        // Joueur touché - RETOUR SIMPLE
         this.socket.on('player-hit', (data) => {
             const { attackerId, targetId, damage, newHealth, knockout } = data;
             
-            console.log(`💥 ${attackerId} frappe ${targetId} (${damage} dégâts, santé: ${newHealth})`);
-            
-            // Mettre à jour la barre de vie - utiliser updatePlayerData qui existe dans game.js
+            // Mettre à jour la barre de vie
             if (game && game.updatePlayerData) {
                 game.updatePlayerData(targetId, newHealth);
             }
@@ -144,12 +118,12 @@ class NetworkManager {
                 const targetName = game.getPlayerNameById(targetId);
                 game.showKOMessage(`💀 ${targetName} est K.O. !`, 2000);
                 
-                // Son de KO aléatoire
-                this.playRandomSound('ko', 0.8);
+                // Son de KO
+                this.playRandomSoundFallback('ko', 0.8);
             }
             
-            // Son d'impact - son aléatoire de kick
-            this.playRandomSound('kick', 0.6);
+            // Son d'impact
+            this.playRandomSoundFallback('kick', 0.6);
         });
 
         // Réapparition d'un joueur
@@ -179,7 +153,7 @@ class NetworkManager {
             this.showGoalEffect(team);
             
             // Son de but - son aléatoire de goal
-            this.playRandomSound('goal', 0.7);
+            this.playRandomSoundFallback('goal', 0.7);
         });
 
         // Fin de partie
@@ -207,7 +181,7 @@ class NetworkManager {
         });
     }
 
-    // Rejoindre une partie
+    // Rejoindre une partie - RETOUR SIMPLE
     joinGame(playerName) {
         if (!this.connected) {
             uiManager.showConnectionStatus('Connexion au serveur...', 'info');
@@ -319,67 +293,80 @@ class NetworkManager {
         animate();
     }
 
+    // OPTIMISATION: Réduire la complexité des effets visuels
     showHitEffect(playerId, damage) {
         const player = game.players.get(playerId);
         if (!player) return;
 
-        // Effet de secousse
+        // OPTIMISATION: Réduire la durée et l'intensité de la secousse
         const originalPosition = player.position.clone();
-        const shakeIntensity = 0.2;
-        const shakeDuration = 300;
-        const startTime = Date.now();
+        const shakeIntensity = 0.05; // Réduire de 0.1 à 0.05
+        let shakeFrames = 0;
+        const maxFrames = 6; // Réduire de 10 à 6 frames
 
         const shake = () => {
-            const elapsed = Date.now() - startTime;
-            if (elapsed >= shakeDuration) {
+            shakeFrames++;
+            if (shakeFrames >= maxFrames) {
                 player.position.copy(originalPosition);
                 return;
             }
 
-            player.position.x = originalPosition.x + (Math.random() - 0.5) * shakeIntensity;
-            player.position.z = originalPosition.z + (Math.random() - 0.5) * shakeIntensity;
+            const intensity = shakeIntensity * (1 - shakeFrames / maxFrames);
+            player.position.x = originalPosition.x + (Math.random() - 0.5) * intensity;
+            player.position.z = originalPosition.z + (Math.random() - 0.5) * intensity;
 
             requestAnimationFrame(shake);
         };
 
         shake();
 
-        // Afficher les dégâts
-        this.showActionEffect(player.position, `-${damage}`);
+        // OPTIMISATION: Afficher les dégâts seulement pour les très gros dégâts
+        if (damage >= 30) { // Augmenter le seuil de 20 à 30
+            this.showActionEffect(player.position, `-${damage}`);
+        }
     }
 
+    // OPTIMISATION: Effets de particules encore plus légers
     showGoalEffect(team) {
-        // Effet de particules pour célébrer le but
-        const particleCount = 50;
+        const particleCount = 15; // Réduire encore de 20 à 15
         const particles = [];
         const color = team === 'blue' ? 0x4169E1 : 0xFF4500;
 
         for (let i = 0; i < particleCount; i++) {
-            const geometry = new THREE.SphereGeometry(0.1, 8, 8);
+            const geometry = new THREE.SphereGeometry(0.06, 4, 3); // Qualité encore plus basse
             const material = new THREE.MeshBasicMaterial({ color });
             const particle = new THREE.Mesh(geometry, material);
 
             particle.position.set(
-                (Math.random() - 0.5) * 20,
-                Math.random() * 10 + 5,
-                (Math.random() - 0.5) * 10
+                (Math.random() - 0.5) * 12, // Zone encore plus petite
+                Math.random() * 6 + 2,
+                (Math.random() - 0.5) * 6
             );
 
             particle.velocity = new THREE.Vector3(
-                (Math.random() - 0.5) * 0.2,
-                Math.random() * 0.1,
-                (Math.random() - 0.5) * 0.2
+                (Math.random() - 0.5) * 0.1,
+                Math.random() * 0.06,
+                (Math.random() - 0.5) * 0.1
             );
 
             game.scene.add(particle);
             particles.push(particle);
         }
 
-        // Animation des particules
+        // Animation plus courte
+        let frameCount = 0;
+        const maxFrames = 45; // Réduire de 60 à 45 frames
+
         const animateParticles = () => {
+            frameCount++;
+            if (frameCount > maxFrames) {
+                particles.forEach(particle => game.scene.remove(particle));
+                return;
+            }
+
             particles.forEach((particle, index) => {
                 particle.position.add(particle.velocity);
-                particle.velocity.y -= 0.01; // Gravité
+                particle.velocity.y -= 0.006; // Gravité encore plus réduite
 
                 if (particle.position.y < 0) {
                     game.scene.remove(particle);
@@ -395,105 +382,30 @@ class NetworkManager {
         animateParticles();
     }
 
-    // Système audio avec fichiers MP3
-    playAudioFile(fileName, volume = 0.3) {
-        try {
-            const audio = new Audio(`medias/${fileName}`);
-            audio.volume = volume;
-            audio.play().catch(e => {
-                console.log(`Son ${fileName} non disponible:`, e);
-            });
-        } catch (error) {
-            console.log(`Erreur lecture son ${fileName}:`, error);
-        }
-    }
-
-    // Jouer un son aléatoire depuis un dossier
-    async playRandomSound(folder, volume = 0.5) {
-        try {
-            // Essayer de récupérer la liste des fichiers via une requête au serveur
-            const response = await fetch(`/api/sounds/${folder}`);
-            
-            if (response.ok) {
-                const files = await response.json();
-                if (files && files.length > 0) {
-                    // Choisir un fichier aléatoire
-                    const randomFile = files[Math.floor(Math.random() * files.length)];
-                    
-                    const audio = new Audio(`medias/${folder}/${randomFile}`);
-                    audio.volume = volume;
-                    
-                    audio.play().then(() => {
-                        console.log(`🎵 Son aléatoire joué: ${folder}/${randomFile}`);
-                    }).catch(e => {
-                        console.log(`Erreur lecture ${randomFile}:`, e);
-                    });
-                    
-                    return;
-                }
-            }
-            
-            // Fallback: essayer quelques noms de fichiers courants
-            console.log(`⚠️ API non disponible, essai des fichiers courants dans ${folder}/`);
-            await this.playRandomSoundFallback(folder, volume);
-            
-        } catch (error) {
-            console.log(`❌ Erreur accès dossier ${folder}:`, error);
-            // Fallback en cas d'erreur
-            await this.playRandomSoundFallback(folder, volume);
-        }
-    }
-
-    // Méthode de fallback qui teste des noms courants
+    // OPTIMISATION: Audio avec cache simple
     async playRandomSoundFallback(folder, volume = 0.5) {
-        const commonNames = [
-            '1.mp3', '2.mp3', '3.mp3', '4.mp3', '5.mp3',
-            'sound1.mp3', 'sound2.mp3', 'sound3.mp3',
-            `${folder}1.mp3`, `${folder}2.mp3`, `${folder}3.mp3`,
-            'audio1.mp3', 'audio2.mp3', 'audio3.mp3',
-            'a.mp3', 'b.mp3', 'c.mp3'
-        ];
+        // Cache simple pour éviter de recharger les mêmes sons
+        if (!this.audioCache) this.audioCache = {};
+        const cacheKey = `${folder}_${volume}`;
         
-        // Mélanger les noms et essayer jusqu'à en trouver un qui fonctionne
-        const shuffledNames = commonNames.sort(() => Math.random() - 0.5);
-        
-        for (const fileName of shuffledNames) {
-            try {
-                const audio = new Audio(`medias/${folder}/${fileName}`);
-                audio.volume = volume;
-                
-                // Promesse pour tester si le fichier se charge
-                await new Promise((resolve, reject) => {
-                    const timeout = setTimeout(() => reject(new Error('Timeout')), 1000);
-                    
-                    audio.onloadeddata = () => {
-                        clearTimeout(timeout);
-                        resolve();
-                    };
-                    audio.onerror = () => {
-                        clearTimeout(timeout);
-                        reject(new Error('Load error'));
-                    };
-                    
-                    audio.load();
-                });
-                
-                // Si on arrive ici, le fichier existe
-                audio.play().then(() => {
-                    console.log(`🎵 Son fallback joué: ${folder}/${fileName}`);
-                }).catch(e => {
-                    console.log(`Erreur lecture fallback:`, e);
-                });
-                
-                return; // Succès, sortir
-                
-            } catch (error) {
-                // Continuer avec le fichier suivant
-                continue;
-            }
+        if (this.audioCache[cacheKey]) {
+            this.audioCache[cacheKey].currentTime = 0;
+            this.audioCache[cacheKey].play().catch(() => {});
+            return;
         }
+
+        const commonNames = ['1.mp3', '2.mp3', '3.mp3'];
+        const randomFile = commonNames[Math.floor(Math.random() * commonNames.length)];
         
-        console.log(`❌ Aucun son trouvé dans medias/${folder}/`);
+        try {
+            const audio = new Audio(`medias/${folder}/${randomFile}`);
+            audio.volume = volume;
+            this.audioCache[cacheKey] = audio;
+            
+            audio.play().catch(() => {});
+        } catch (error) {
+            // Ignorer les erreurs audio
+        }
     }
 
 

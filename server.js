@@ -282,7 +282,7 @@ function stopGame() {
 function checkGoal() {
     const ball = gameState.ball;
     const goalZ = 24; // Distance du but
-    const goalWidth = 6; // Largeur du but
+    const goalWidth = 3; // CORRECTION: Réduire de 6 à 3 pour correspondre aux poteaux visuels (±3 = largeur 6)
     
     // But équipe rouge (côté positif)
     if (ball.position.z > goalZ && Math.abs(ball.position.x) < goalWidth) {
@@ -320,25 +320,25 @@ function resetBall() {
 
 function updateBall(dt) {
     const ball = gameState.ball;
-    const gravity = -9.01;
-    const bounce = 0.06; // Rebond léger mais réaliste
-    const friction = 0.69;
+    const gravity = -0.01;
+    const bounce = 0.1; // Rebond léger mais réaliste
+    const friction = 0.10;
     const factor = 15;
     
     // Appliquer la gravité
-    ball.velocity.y += gravity * dt * factor * 200;
+    ball.velocity.y += gravity * dt * factor * 150;
     
     // Mettre à jour la position
-    ball.position.x += ball.velocity.x * dt * factor * 20;
-    ball.position.y += ball.velocity.y * dt * factor * 20;
-    ball.position.z += ball.velocity.z * dt * factor * 20;
+    ball.position.x += ball.velocity.x * dt * factor * 15;
+    ball.position.y += ball.velocity.y * dt * factor * 2;
+    ball.position.z += ball.velocity.z * dt * factor * 15;
 
     // Collision avec le sol - rebond normal
     if (ball.position.y <= 0.5) {
         ball.position.y = 0.5;
         ball.velocity.y = -ball.velocity.y * bounce;
-        ball.velocity.x *= friction;
-        ball.velocity.z *= friction;
+        ball.velocity.x *= friction * dt;
+        ball.velocity.z *= friction * dt;
     }
     
     // Limites du terrain normales mais agrandies

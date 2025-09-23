@@ -1163,7 +1163,6 @@ class SoccerBoxGame {
 
         const punch = this.keys['Space'] || this.mouseState.clicked;
         const kick = this.keys['KeyF'] || this.mouseState.rightClicked;
-        const testAnimation = this.keys['KeyT']; // Touche T pour test
 
         // Envoyer les mouvements au serveur
         if (Object.values(movement).some(v => v)) {
@@ -1188,17 +1187,6 @@ class SoccerBoxGame {
             // Envoyer coup de pied au serveur (si la fonction existe)
             if (networkManager.sendPlayerKick) {
                 networkManager.sendPlayerKick();
-            }
-        }
-
-        // Test d'animation forcée avec T
-        if (testAnimation) {
-            const localPlayer = this.players.get(this.localPlayerId);
-            if (localPlayer && localPlayer.userData.animations) {
-                // Forcer une rotation visible du bras gauche
-                localPlayer.userData.animations.leftArm.rotation.x = Math.sin(Date.now() * 0.01) * 0.5;
-                localPlayer.userData.animations.rightArm.rotation.x = -Math.sin(Date.now() * 0.01) * 0.5;
-                localPlayer.userData.animations.torso.rotation.z = Math.sin(Date.now() * 0.005) * 0.2;
             }
         }
     }
@@ -1281,7 +1269,6 @@ class SoccerBoxGame {
     animate() {
         requestAnimationFrame(() => this.animate());
 
-        // Mettre à jour les animations TWEEN
         if (typeof TWEEN !== 'undefined') {
             TWEEN.update();
         }
@@ -1289,10 +1276,15 @@ class SoccerBoxGame {
         this.updatePlayerControls();
         this.updateCamera();
         
-        // Animer tous les joueurs en mouvement
+        // OPTIMISATION: Limiter les animations selon le nombre de joueurs
+        const playerCount = this.players.size;
+        let animationCounter = 0;
+        
         this.players.forEach((playerGroup, playerId) => {
+            // OPTIMISATION: Si beaucoup de joueurs, animer seulement quelques-uns par frame
+            if (playerCount > 6 && animationCounter > 3) return;
+            
             if (playerGroup && playerGroup.userData && playerGroup.userData.animations) {
-                // Calculer la vitesse de déplacement depuis la position précédente
                 if (!playerGroup.userData.previousPosition) {
                     playerGroup.userData.previousPosition = playerGroup.position.clone();
                 }
@@ -1300,17 +1292,15 @@ class SoccerBoxGame {
                 const currentPos = playerGroup.position;
                 const prevPos = playerGroup.userData.previousPosition;
                 const deltaPos = new THREE.Vector3().subVectors(currentPos, prevPos);
-                const speed = deltaPos.length() * 60; // Vitesse approximative par seconde
+                const speed = deltaPos.length() * 60;
                 
-                // Seuils pour marche et course
-                const isMoving = speed > 0.01; // Seuil plus bas pour détecter les petits mouvements
-                const isRunning = speed > 1; // Seuil plus bas aussi
+                const isMoving = speed > 0.01;
+                const isRunning = speed > 1;
                 
-                // Toujours animer (même en idle)
                 this.animatePlayerMovement(playerGroup, deltaPos.length() > 0.001 ? deltaPos.normalize() : new THREE.Vector3(), isRunning);
                 
-                // Mettre à jour la position précédente
                 playerGroup.userData.previousPosition.copy(currentPos);
+                animationCounter++;
             }
         });
         

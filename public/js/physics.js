@@ -56,7 +56,7 @@ class PhysicsManager {
             this.groundMaterial, 
             {
                 friction: 0.9, // Friction maximale
-                restitution: 0.0, // AUCUN rebond
+                restitution: 0.3,
                 contactEquationStiffness: 1e8,
                 contactEquationRelaxation: 3
             }
