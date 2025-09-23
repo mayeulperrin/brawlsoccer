@@ -132,8 +132,10 @@ class NetworkManager {
             
             console.log(`💥 ${attackerId} frappe ${targetId} (${damage} dégâts, santé: ${newHealth})`);
             
-            // Mettre à jour la barre de vie
-            game.updatePlayerHealth(targetId, newHealth);
+            // Mettre à jour la barre de vie - utiliser updatePlayerData qui existe dans game.js
+            if (game && game.updatePlayerData) {
+                game.updatePlayerData(targetId, newHealth);
+            }
             
             // Effets visuels
             this.showHitEffect(targetId, damage);
@@ -154,12 +156,10 @@ class NetworkManager {
         this.socket.on('player-respawn', (data) => {
             const { playerId, health } = data;
             
-            console.log(`🔄 ${playerId} réapparaît avec ${health} PV`);
-            
-            // Mettre à jour la barre de vie à 100%
-            game.updatePlayerHealth(playerId, health);
-            
-            // Pas de message visuel pour la réapparition
+            // Mettre à jour la barre de vie à 100% - utiliser updatePlayerData qui existe
+            if (game && game.updatePlayerData) {
+                game.updatePlayerData(playerId, health);
+            }
         });
 
         // But marqué

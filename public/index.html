@@ -468,9 +468,6 @@
         
         // Initialiser les événements une fois tous les scripts chargés
         function initializeGameEvents() {
-            console.log('🎮 Initialisation des événements de jeu (sans toucher à l\'input)...');
-            
-            // NE PAS toucher à l'input ici - il est géré par le script DOMContentLoaded
             
             const joinBtn = document.getElementById('joinGameBtn');
             if (joinBtn && window.uiManager) {
@@ -654,32 +651,8 @@
             const playerInput = document.getElementById('playerName');
             
             if (playerInput) {
-                // Tests sur l'input
-                console.log(`Input disabled: ${playerInput.disabled}`);
-                console.log(`Input pointer-events: ${getComputedStyle(playerInput).pointerEvents}`);
-                console.log(`Input cursor: ${getComputedStyle(playerInput).cursor}`);
-                
-                // Événements (identiques à la version qui fonctionne)
-                playerInput.addEventListener('input', function() {
-                    console.log(`✅ Saisie détectée: "${this.value}"`);
-                });
-                
-                playerInput.addEventListener('focus', function() {
-                    console.log('🎯 Focus obtenu sur l\'input');
-                });
-                
-                playerInput.addEventListener('blur', function() {
-                    console.log('👋 Focus perdu sur l\'input');
-                });
-                
-                playerInput.addEventListener('click', function() {
-                    console.log('🖱️ Clic détecté sur l\'input');
-                });
-                
-                // Focus automatique (comme la version qui fonctionne)
                 setTimeout(() => {
                     playerInput.focus();
-                    console.log('🎯 Focus automatique appliqué');
                 }, 500);
             }
         });

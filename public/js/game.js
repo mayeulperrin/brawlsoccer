@@ -1175,7 +1175,6 @@ class SoccerBoxGame {
             // Animation locale du coup de poing
             const localPlayer = this.players.get(this.localPlayerId);
             if (localPlayer) {
-                console.log("👊 Animation de coup de poing déclenchée !");
                 this.animatePlayerPunch(localPlayer, Math.random() > 0.5);
             }
         }
@@ -1184,7 +1183,6 @@ class SoccerBoxGame {
             // Animation locale du coup de pied immédiate
             const localPlayer = this.players.get(this.localPlayerId);
             if (localPlayer) {
-                console.log("🦶 Animation de coup de pied déclenchée !");
                 this.animatePlayerKick(localPlayer, Math.random() > 0.5);
             }
             // Envoyer coup de pied au serveur (si la fonction existe)
@@ -1197,7 +1195,6 @@ class SoccerBoxGame {
         if (testAnimation) {
             const localPlayer = this.players.get(this.localPlayerId);
             if (localPlayer && localPlayer.userData.animations) {
-                console.log("🧪 Test d'animation forcée !");
                 // Forcer une rotation visible du bras gauche
                 localPlayer.userData.animations.leftArm.rotation.x = Math.sin(Date.now() * 0.01) * 0.5;
                 localPlayer.userData.animations.rightArm.rotation.x = -Math.sin(Date.now() * 0.01) * 0.5;
@@ -1223,7 +1220,7 @@ class SoccerBoxGame {
 
             // Mettre à jour la santé
             if (playerData.health !== undefined) {
-                this.updatePlayerHealth(playerData.id, playerData.health);
+                this.updatePlayerData(playerData.id, playerData.health);
             }
 
             // Effet de knockout
@@ -1353,7 +1350,7 @@ class SoccerBoxGame {
         return player ? player.name : playerId;
     }
 
-    updatePlayerHealth(playerId, newHealth) {
+    updatePlayerData(playerId, newHealth) {
         const playerGroup = this.players.get(playerId);
         if (!playerGroup) {
             console.log(`❌ Joueur ${playerId} introuvable pour mise à jour santé`);
@@ -1370,7 +1367,6 @@ class SoccerBoxGame {
             // Marquer la texture comme nécessitant une mise à jour
             healthBar.userData.texture.needsUpdate = true;
             healthBar.userData.health = newHealth;
-            
         }
     }
 }

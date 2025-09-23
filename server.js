@@ -78,6 +78,8 @@ class Player {
         this.punchCooldown = 500; // ms
         this.connected = true;
         this.io = ioInstance;
+        this.giveKOCount = 0; // Nombre de KO donnés
+        this.receiveKOCount = 0; // Nombre de KO subis
     }
 
     getSpawnPosition(team) {
@@ -113,12 +115,15 @@ class Player {
             this.health = 100;
             this.isKnockedOut = false;
             this.position = this.getSpawnPosition(this.team);
+            this.receiveKOCount++; // Incrémenter le nombre de KO subis
             
             // Envoyer l'événement de réapparition
             this.io.emit('player-respawn', {
                 playerId: this.id,
                 health: this.health,
-                position: this.position
+                position: this.position,
+                receiveKOCount: this.receiveKOCount,
+                giveKOCount: this.giveKOCount
             });
         }, 3000); // 3 secondes de knockout
     }
@@ -140,8 +145,6 @@ class Player {
 
 // Gestionnaire des connexions
 io.on('connection', (socket) => {
-    console.log(`Nouveau joueur connecté: ${socket.id}`);
-    
     // Connexion d'un joueur
     socket.on('join-game', (playerName) => {
         if (gameState.players.size >= gameState.maxPlayers) {
@@ -172,8 +175,6 @@ io.on('connection', (socket) => {
         if (gameState.players.size >= 2 && !gameState.gameStarted) {
             startGame();
         }
-
-        console.log(`${playerName} a rejoint l'équipe ${team}`);
     });
 
     // Mouvement du joueur
@@ -213,6 +214,10 @@ io.on('connection', (socket) => {
 
             if (distance <= punchRange) {
                 const newHealth = target.takeDamage(punchDamage);
+
+                if (newHealth === 0) {
+                    player.giveKOCount++;
+                }
                 
                 // Repousser le joueur touché
                 const pushForce = 5;
@@ -245,7 +250,6 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         const player = gameState.players.get(socket.id);
         if (player) {
-            console.log(`${player.name} s'est déconnecté`);
             gameState.players.delete(socket.id);
             io.emit('player-left', socket.id);
             
@@ -268,13 +272,11 @@ function startGame() {
     gameState.ball.velocity = { x: 0, y: 0, z: 0 };
 
     io.emit('game-started');
-    console.log('Partie démarrée !');
 }
 
 function stopGame() {
     gameState.gameStarted = false;
     io.emit('game-stopped');
-    console.log('Partie arrêtée');
 }
 
 function checkGoal() {
@@ -389,7 +391,9 @@ function getClientGameState() {
             position: p.position,
             rotation: p.rotation,
             health: p.health,
-            isKnockedOut: p.isKnockedOut
+            isKnockedOut: p.isKnockedOut,
+            giveKOCount: p.giveKOCount,
+            receiveKOCount: p.receiveKOCount
         })),
         ball: gameState.ball,
         score: gameState.score,

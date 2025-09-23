@@ -176,6 +176,7 @@ class UIManager {
 
     // Liste des joueurs
     updatePlayersList(players) {
+        
         this.elements.playersContent.innerHTML = '';
         
         // Grouper par équipe
@@ -236,7 +237,7 @@ class UIManager {
                 ${statusIcon} ${player.name} ${isLocal ? '(Vous)' : ''}
             </div>
             <div style="font-size: 11px; color: rgba(255, 255, 255, 0.7);">
-                ❤️ ${player.health}% | 📍 ${Math.round(player.position.x)}, ${Math.round(player.position.z)}
+                ❤️ ${player.health}% | 🥊 ${player.giveKOCount || 0} KO | 💀 ${player.receiveKOCount || 0} subis
             </div>
         `;
         
