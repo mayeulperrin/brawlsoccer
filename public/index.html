@@ -388,9 +388,12 @@
             <!-- Contrôles -->
             <div id="controls">
                 <h4>🎮 Contrôles</h4>
-                <p><strong>Z Q S D</strong> ou <strong>↑ ← ↓ →</strong> : Déplacer</p>
-                <p><strong>Espace</strong> ou <strong>Clic souris</strong> : Coup de poing</p>
-                <p><strong>Pieds uniquement</strong> pour toucher le ballon</p>
+                <p><strong>W A S D</strong> ou <strong>↑ ← ↓ →</strong> : Déplacer</p>
+                <p><strong>Espace</strong> ou <strong>Clic gauche</strong> : Coup de poing 👊</p>
+                <p><strong>F</strong> ou <strong>Clic droit</strong> : Coup de pied 🦶</p>
+                <p><strong>T</strong> : Test d'animations 🧪</p>
+                <p><strong>Les pieds</strong> touchent le ballon automatiquement</p>
+                <p><em>Animations réalistes lors des mouvements !</em></p>
             </div>
 
             <!-- Messages de jeu -->
@@ -497,6 +500,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" 
             onload="diagnostic.logStep('Three.js chargé', 'success'); window.librariesLoaded.three = true; window.librariesLoaded.count++; checkLibrariesLoaded();"
             onerror="diagnostic.logStep('Three.js', 'error', 'Impossible de charger depuis CDN'); alert('Impossible de charger Three.js. Vérifiez votre connexion internet.');"></script>
+    
+    <!-- TWEEN.js pour les animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
     
     <!-- Cannon.js - Essayer plusieurs CDN en fallback -->
     <script>

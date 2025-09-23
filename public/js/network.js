@@ -107,13 +107,22 @@ class NetworkManager {
             uiManager.showGameStopped();
         });
 
-        // Action de joueur (coup de poing, etc.)
+        // Action de joueur (coup de poing, coup de pied, etc.)
         this.socket.on('player-action', (data) => {
             if (data.action === 'punch') {
                 game.animatePunch(data.playerId);
                 
                 // Effet visuel
                 this.showActionEffect(data.position, '👊');
+            } else if (data.action === 'kick') {
+                // Animation de coup de pied
+                const playerGroup = game.players.get(data.playerId);
+                if (playerGroup) {
+                    game.animatePlayerKick(playerGroup, Math.random() > 0.5);
+                }
+                
+                // Effet visuel
+                this.showActionEffect(data.position, '🦶');
             }
         });
 
@@ -241,6 +250,13 @@ class NetworkManager {
         if (!this.connected || !this.playerId) return;
 
         this.socket.emit('player-punch');
+    }
+
+    // Envoyer un coup de pied
+    sendPlayerKick() {
+        if (!this.connected || !this.playerId) return;
+
+        this.socket.emit('player-kick');
     }
 
     // Envoyer un message de chat (future fonctionnalité)

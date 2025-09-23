@@ -20,7 +20,7 @@ class SoccerBoxGame {
         
         this.localPlayerId = null;
         this.keys = {};
-        this.mouseState = { clicked: false };
+        this.mouseState = { clicked: false, rightClicked: false };
         
         this.init();
     }
@@ -300,42 +300,259 @@ class SoccerBoxGame {
 
     createPlayer(playerData) {
         const playerGroup = new THREE.Group();
+        
+        // Couleurs d'équipe améliorées
+        const teamColors = {
+            blue: {
+                primary: 0x1E88E5,      // Bleu moderne
+                secondary: 0x0D47A1,    // Bleu foncé
+                accent: 0x42A5F5        // Bleu clair
+            },
+            red: {
+                primary: 0xE53935,      // Rouge moderne  
+                secondary: 0xB71C1C,    // Rouge foncé
+                accent: 0xEF5350        // Rouge clair
+            }
+        };
+        
+        const colors = teamColors[playerData.team];
 
-        // Corps du joueur
-        const bodyGeometry = new THREE.CylinderGeometry(0.5, 0.8, 2);
-        const bodyMaterial = new THREE.MeshLambertMaterial({ 
-            color: playerData.team === 'blue' ? 0x4169E1 : 0xFF4500 
+        // === CORPS PRINCIPAL ===
+        // Torse arrondi avec forme plus organique
+        const torsoGeometry = new THREE.CylinderGeometry(0.6, 0.55, 1.4, 16);
+        const torsoMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.primary,
+            shininess: 30
         });
-        const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-        body.position.y = 1;
-        body.castShadow = true;
-        playerGroup.add(body);
+        const torso = new THREE.Mesh(torsoGeometry, torsoMaterial);
+        torso.position.y = 1.4;
+        torso.castShadow = true;
+        playerGroup.add(torso);
+        
+        // Maillot arrondi suivant la forme du torse
+        const jerseyGeometry = new THREE.CylinderGeometry(0.61, 0.56, 1.41, 16);
+        const jerseyMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.secondary,
+            transparent: true,
+            opacity: 0.8
+        });
+        const jersey = new THREE.Mesh(jerseyGeometry, jerseyMaterial);
+        jersey.position.y = 1.4;
+        playerGroup.add(jersey);
 
-        // Tête
-        const headGeometry = new THREE.SphereGeometry(0.4);
-        const headMaterial = new THREE.MeshLambertMaterial({ color: 0xFFDBB5 });
+        // Col pour transition douce torse/tête
+        const collarGeometry = new THREE.CylinderGeometry(0.35, 0.32, 0.2, 16);
+        const collarMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.secondary,
+            shininess: 30
+        });
+        const collar = new THREE.Mesh(collarGeometry, collarMaterial);
+        collar.position.y = 2.25;
+        collar.castShadow = true;
+        playerGroup.add(collar);
+
+        // === TÊTE DÉTAILLÉE ===
+        // Tête plus ovale et naturelle
+        const headGeometry = new THREE.SphereGeometry(0.45, 20, 16);
+        headGeometry.scale(1, 1.15, 0.9); // Légèrement ovale
+        const headMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0xFFDBB5,
+            shininess: 10
+        });
         const head = new THREE.Mesh(headGeometry, headMaterial);
-        head.position.y = 2.4;
+        head.position.y = 2.6;
         head.castShadow = true;
         playerGroup.add(head);
+        
+        // Yeux
+        const eyeGeometry = new THREE.SphereGeometry(0.06, 8, 6);
+        const eyeMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        
+        const leftEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+        leftEye.position.set(-0.15, 2.65, 0.35);
+        playerGroup.add(leftEye);
+        
+        const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
+        rightEye.position.set(0.15, 2.65, 0.35);
+        playerGroup.add(rightEye);
+        
+        // Casque/bandeau d'équipe
+        const helmetGeometry = new THREE.SphereGeometry(0.47, 16, 8, 0, Math.PI * 2, 0, Math.PI * 0.7);
+        const helmetMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.accent,
+            transparent: true,
+            opacity: 0.7
+        });
+        const helmet = new THREE.Mesh(helmetGeometry, helmetMaterial);
+        helmet.position.y = 2.6;
+        playerGroup.add(helmet);
 
-        // Gants de boxe
-        const gloveGeometry = new THREE.SphereGeometry(0.3);
-        const gloveMaterial = new THREE.MeshLambertMaterial({ color: 0x8B0000 });
+        // === BRAS ARTICULÉS ===
+        // Épaules plus douces et arrondies
+        const shoulderGeometry = new THREE.SphereGeometry(0.28, 16, 12);
+        shoulderGeometry.scale(1.2, 0.8, 1); // Légèrement aplaties
+        const shoulderMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.primary,
+            shininess: 20
+        });
+        
+        const leftShoulder = new THREE.Mesh(shoulderGeometry, shoulderMaterial);
+        leftShoulder.position.set(-0.65, 2.0, 0);
+        leftShoulder.castShadow = true;
+        playerGroup.add(leftShoulder);
+        
+        const rightShoulder = new THREE.Mesh(shoulderGeometry, shoulderMaterial);
+        rightShoulder.position.set(0.65, 2.0, 0);
+        rightShoulder.castShadow = true;
+        playerGroup.add(rightShoulder);
+        
+        // Bras plus arrondis avec segments
+        const armGeometry = new THREE.CylinderGeometry(0.14, 0.16, 0.8, 12);
+        const armMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0xFFDBB5,
+            shininess: 15
+        });
+        
+        const leftArm = new THREE.Mesh(armGeometry, armMaterial);
+                leftArm.position.set(-0.65, 1.4, 0); // Aligné avec l'épaule gauche
+        leftArm.castShadow = true;
+        playerGroup.add(leftArm);
+        
+        const rightArm = new THREE.Mesh(armGeometry, armMaterial);
+                rightArm.position.set(0.65, 1.4, 0); // Aligné avec l'épaule droite
+        rightArm.castShadow = true;
+        playerGroup.add(rightArm);
+        
+        // Coudes pour des transitions plus douces
+        const elbowGeometry = new THREE.SphereGeometry(0.16, 12, 8);
+        const elbowMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0xFFDBB5,
+            shininess: 15
+        });
+        
+        const leftElbow = new THREE.Mesh(elbowGeometry, elbowMaterial);
+                leftElbow.position.set(-0.65, 1.0, 0); // Aligné avec le bras gauche
+        leftElbow.castShadow = true;
+        playerGroup.add(leftElbow);
+        
+        const rightElbow = new THREE.Mesh(elbowGeometry, elbowMaterial);
+                rightElbow.position.set(0.65, 1.0, 0); // Aligné avec le bras droit
+
+        rightElbow.castShadow = true;
+        playerGroup.add(rightElbow);
+
+        // === GANTS DE BOXE AMÉLIORÉS ===
+        const gloveGeometry = new THREE.SphereGeometry(0.22, 12, 8);
+                gloveGeometry.scale(1.1, 0.8, 1.2); // Forme plus réaliste
+
+        const gloveMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0xDC143C,
+            shininess: 50
+        });
         
         const leftGlove = new THREE.Mesh(gloveGeometry, gloveMaterial);
-        leftGlove.position.set(-0.8, 1.5, 0);
+                leftGlove.position.set(-0.65, 0.9, 0.2); // Aligné avec le bras/coude gauche
+
         leftGlove.castShadow = true;
         playerGroup.add(leftGlove);
 
         const rightGlove = new THREE.Mesh(gloveGeometry, gloveMaterial);
-        rightGlove.position.set(0.8, 1.5, 0);
+                rightGlove.position.set(0.65, 0.9, 0.2); // Aligné avec le bras/coude droit
+
         rightGlove.castShadow = true;
         playerGroup.add(rightGlove);
 
-        // Nom du joueur avec barre de vie
+        // === JAMBES ===
+        // Jambes plus arrondies et naturelles
+        const legGeometry = new THREE.CylinderGeometry(0.18, 0.22, 1.2, 14);
+        const legMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.primary,
+            shininess: 20
+        });
+        
+        const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
+        leftLeg.position.set(-0.22, 0.3, 0);
+        leftLeg.castShadow = true;
+        playerGroup.add(leftLeg);
+        
+        const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
+        rightLeg.position.set(0.22, 0.3, 0);
+        rightLeg.castShadow = true;
+        playerGroup.add(rightLeg);
+        
+        // Genoux pour des transitions plus douces
+        const kneeGeometry = new THREE.SphereGeometry(0.20, 12, 8);
+        const kneeMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.primary,
+            shininess: 25
+        });
+        
+        const leftKnee = new THREE.Mesh(kneeGeometry, kneeMaterial);
+        leftKnee.position.set(-0.22, -0.1, 0);
+        leftKnee.castShadow = true;
+        playerGroup.add(leftKnee);
+        
+        const rightKnee = new THREE.Mesh(kneeGeometry, kneeMaterial);
+        rightKnee.position.set(0.22, -0.1, 0);
+        rightKnee.castShadow = true;
+        playerGroup.add(rightKnee);
+
+        // === CHAUSSURES DE FOOT ===
+        // Chaussures plus arrondies et réalistes
+        const shoeGeometry = new THREE.CylinderGeometry(0.12, 0.18, 0.8, 10);
+        shoeGeometry.rotateZ(Math.PI / 2); // Orientation horizontale
+        const shoeMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0x1a1a1a,
+            shininess: 60
+        });
+        
+        const leftShoe = new THREE.Mesh(shoeGeometry, shoeMaterial);
+        leftShoe.position.set(-0.22, -0.28, 0.15);
+        leftShoe.castShadow = true;
+        playerGroup.add(leftShoe);
+        
+        const rightShoe = new THREE.Mesh(shoeGeometry, shoeMaterial);
+        rightShoe.position.set(0.22, -0.28, 0.15);
+        rightShoe.castShadow = true;
+        playerGroup.add(rightShoe);
+        
+        // Crampons
+        const stutGeometry = new THREE.SphereGeometry(0.03, 6, 4);
+        const stutMaterial = new THREE.MeshBasicMaterial({ color: 0x888888 });
+        
+        for(let i = 0; i < 2; i++) {
+            const xPos = i === 0 ? -0.25 : 0.25;
+            for(let j = 0; j < 4; j++) {
+                const stut = new THREE.Mesh(stutGeometry, stutMaterial);
+                stut.position.set(xPos + (j-1.5) * 0.06, -0.32, 0.1 + (j % 2) * 0.2);
+                playerGroup.add(stut);
+            }
+        }
+
+        // === EFFETS VISUELS ===
+        // Aura d'équipe subtile et fine
+        const auraGeometry = new THREE.RingGeometry(1.2, 1.3, 32);
+        const auraMaterial = new THREE.MeshBasicMaterial({ 
+            color: colors.accent,
+            transparent: true,
+            opacity: 0.25,
+            side: THREE.DoubleSide
+        });
+        const aura = new THREE.Mesh(auraGeometry, auraMaterial);
+        aura.rotation.x = -Math.PI / 2;
+        aura.position.y = 0.01;
+        playerGroup.add(aura);
+        
+        // Numéro sur le maillot
+        const playerNumber = Math.floor(Math.random() * 99) + 1;
+        const numberSprite = this.createNumberSprite(playerNumber, colors.accent);
+        numberSprite.position.set(0, 1.6, 0.31);
+        numberSprite.scale.set(0.8, 0.8, 1);
+        playerGroup.add(numberSprite);
+
+        // Nom du joueur avec barre de vie améliorée
         const nameSprite = this.createNameSprite(playerData.name, playerData.team, playerData.health || 100);
-        nameSprite.position.y = 3.5;
+        nameSprite.position.y = 4.0; // Plus haut à cause de la taille
         playerGroup.add(nameSprite);
 
         // Trouver et stocker la référence à la barre de vie
@@ -348,23 +565,185 @@ class SoccerBoxGame {
             }
         }
 
-        // Stocker les références pour les animations
+        // === STOCKAGE DES RÉFÉRENCES POUR ANIMATIONS ===
         playerGroup.userData = {
-            body: body,
+            torso: torso,
             head: head,
             leftGlove: leftGlove,
             rightGlove: rightGlove,
+            leftArm: leftArm,
+            rightArm: rightArm,
+            leftShoulder: leftShoulder,
+            rightShoulder: rightShoulder,
+            leftLeg: leftLeg,
+            rightLeg: rightLeg,
+            aura: aura,
+            helmet: helmet,
             playerId: playerData.id,
             team: playerData.team,
+            colors: colors,
             punchAnimation: null,
-            healthBar: healthBarRef // Référence directe à la barre de vie
+            walkAnimation: null,
+            healthBar: healthBarRef,
+            // Structure pour les animations
+            animations: {
+                torso: torso,
+                head: head,
+                leftArm: leftArm,
+                rightArm: rightArm,
+                leftLeg: leftLeg,
+                rightLeg: rightLeg
+            },
+            originalPositions: {
+                leftGlove: leftGlove.position.clone(),
+                rightGlove: rightGlove.position.clone(),
+                leftArm: leftArm.rotation.clone(),
+                rightArm: rightArm.rotation.clone()
+            }
         };
+
+        // Ajouter une animation d'apparition
+        this.playSpawnAnimation(playerGroup);
 
         playerGroup.position.copy(playerData.position);
         this.scene.add(playerGroup);
         this.players.set(playerData.id, playerGroup);
 
         return playerGroup;
+    }
+
+    // Créer une géométrie arrondie personnalisée
+    createRoundedBox(width, height, depth, radius, segments = 8) {
+        const shape = new THREE.Shape();
+        const halfWidth = width / 2;
+        const halfHeight = height / 2;
+        
+        shape.moveTo(-halfWidth + radius, -halfHeight);
+        shape.lineTo(halfWidth - radius, -halfHeight);
+        shape.quadraticCurveTo(halfWidth, -halfHeight, halfWidth, -halfHeight + radius);
+        shape.lineTo(halfWidth, halfHeight - radius);
+        shape.quadraticCurveTo(halfWidth, halfHeight, halfWidth - radius, halfHeight);
+        shape.lineTo(-halfWidth + radius, halfHeight);
+        shape.quadraticCurveTo(-halfWidth, halfHeight, -halfWidth, halfHeight - radius);
+        shape.lineTo(-halfWidth, -halfHeight + radius);
+        shape.quadraticCurveTo(-halfWidth, -halfHeight, -halfWidth + radius, -halfHeight);
+        
+        const extrudeSettings = {
+            depth: depth,
+            bevelEnabled: true,
+            bevelSegments: segments,
+            steps: 2,
+            bevelSize: radius * 0.1,
+            bevelThickness: radius * 0.1
+        };
+        
+        return new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    }
+
+    // Créer un sprite pour le numéro du joueur
+    createNumberSprite(number, color) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 128;
+        canvas.height = 128;
+        const ctx = canvas.getContext('2d');
+
+        // Fond transparent
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.fillRect(0, 0, 128, 128);
+
+        // Bordure
+        ctx.strokeStyle = `#${color.toString(16).padStart(6, '0')}`;
+        ctx.lineWidth = 4;
+        ctx.strokeRect(0, 0, 128, 128);
+
+        // Numéro
+        ctx.fillStyle = `#${color.toString(16).padStart(6, '0')}`;
+        ctx.font = 'bold 60px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(number.toString(), 64, 64);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        const material = new THREE.SpriteMaterial({ 
+            map: texture,
+            transparent: true
+        });
+        return new THREE.Sprite(material);
+    }
+
+    // Animation d'apparition des joueurs
+    playSpawnAnimation(playerGroup) {
+        // Effet de téléportation
+        const originalScale = playerGroup.scale.clone();
+        playerGroup.scale.setScalar(0);
+        
+        // Animation de scale
+        new TWEEN.Tween(playerGroup.scale)
+            .to({ x: originalScale.x, y: originalScale.y, z: originalScale.z }, 500)
+            .easing(TWEEN.Easing.Back.Out)
+            .start();
+            
+        // Effet de rotation sur l'aura
+        const aura = playerGroup.userData.aura;
+        if (aura) {
+            new TWEEN.Tween(aura.rotation)
+                .to({ z: Math.PI * 2 }, 1000)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .start();
+        }
+        
+        // Particules d'apparition
+        this.createSpawnParticles(playerGroup.position, playerGroup.userData.colors.accent);
+    }
+    
+    // Créer des particules d'apparition
+    createSpawnParticles(position, color) {
+        const particleCount = 20;
+        const particles = new THREE.Group();
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particleGeometry = new THREE.SphereGeometry(0.05, 6, 4);
+            const particleMaterial = new THREE.MeshBasicMaterial({ 
+                color: color,
+                transparent: true,
+                opacity: 0.8
+            });
+            const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+            
+            // Position aléatoire autour du joueur
+            particle.position.set(
+                position.x + (Math.random() - 0.5) * 2,
+                position.y + Math.random() * 3,
+                position.z + (Math.random() - 0.5) * 2
+            );
+            
+            particles.add(particle);
+            
+            // Animation des particules vers le haut
+            new TWEEN.Tween(particle.position)
+                .to({ 
+                    x: particle.position.x + (Math.random() - 0.5) * 4,
+                    y: particle.position.y + 4,
+                    z: particle.position.z + (Math.random() - 0.5) * 4
+                }, 1000)
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .start();
+                
+            // Fade out
+            new TWEEN.Tween(particleMaterial)
+                .to({ opacity: 0 }, 1000)
+                .onComplete(() => {
+                    particles.remove(particle);
+                })
+                .start();
+        }
+        
+        this.scene.add(particles);
+        
+        // Supprimer le groupe après l'animation
+        setTimeout(() => {
+            this.scene.remove(particles);
+        }, 1500);
     }
 
     createHealthBar(health = 100) {
@@ -417,6 +796,236 @@ class SoccerBoxGame {
             ctx.fillStyle = '#FF0000'; // Rouge
         }
         ctx.fillRect(2, 2, healthWidth, 16);
+    }
+
+    // Animations de mouvement pour les joueurs améliorés
+    animatePlayerMovement(playerGroup, direction, isRunning = false) {
+        if (!playerGroup.userData.animations) {
+            console.warn("⚠️ Pas d'animations disponibles pour ce joueur");
+            return;
+        }
+        
+        const { torso, head, leftArm, rightArm, leftLeg, rightLeg } = playerGroup.userData.animations;
+        const baseSpeed = isRunning ? 0.06 : 0.04; // Amplitudes plus visibles
+        const time = Date.now() * 0.001;
+        
+        // Animation de course/marche - SEULEMENT jambes et torse
+        if (direction.length() > 0.1) {
+            // Calcul de la phase pour coordonner les jambes
+            const walkCycle = time * (isRunning ? 10 : 6);
+            
+            // Mouvement des jambes (alternées) - Plus prononcé
+            const leftLegPhase = Math.sin(walkCycle);
+            const rightLegPhase = Math.sin(walkCycle + Math.PI);
+            
+            leftLeg.rotation.x = leftLegPhase * baseSpeed * 20;
+            rightLeg.rotation.x = rightLegPhase * baseSpeed * 20;
+            
+            // BRAS IMMOBILES pendant la marche - position de garde de boxe
+            leftArm.rotation.x = -0.3; // Position de garde fixe
+            rightArm.rotation.x = -0.3; // Position de garde fixe
+            leftArm.rotation.z = 0.2;   // Coudes écartés
+            rightArm.rotation.z = -0.2; // Coudes écartés
+            
+            // Légère oscillation du torse seulement
+            torso.rotation.z = Math.sin(walkCycle * 0.5) * baseSpeed * 2;
+            torso.rotation.x = Math.sin(walkCycle) * baseSpeed * 1;
+            
+            // Mouvement de tête plus subtil
+            head.rotation.y = Math.sin(walkCycle * 0.3) * baseSpeed * 3;
+            head.rotation.x = Math.sin(walkCycle * 0.7) * baseSpeed * 1.5;
+            
+        } else {
+            // Animation d'attente (idle) - Position de boxeur
+            const idleTime = time * 2;
+            
+            // Respiration du torse
+            torso.rotation.z = Math.sin(idleTime) * 0.015;
+            torso.rotation.x = Math.sin(idleTime * 0.7) * 0.01;
+            
+            // Regard qui bouge
+            head.rotation.y = Math.sin(idleTime * 0.3) * 0.03;
+            head.rotation.x = Math.sin(idleTime * 0.5) * 0.015;
+            
+            // BRAS EN POSITION DE GARDE FIXE avec léger balancement
+            const guardBase = -0.3; // Position de base des bras levés
+            leftArm.rotation.x = guardBase + Math.sin(idleTime * 0.3) * 0.05; // Léger mouvement
+            rightArm.rotation.x = guardBase + Math.sin(idleTime * 0.3 + Math.PI) * 0.05;
+            leftArm.rotation.z = 0.2 + Math.sin(idleTime * 0.2) * 0.02;
+            rightArm.rotation.z = -0.2 + Math.sin(idleTime * 0.2) * 0.02;
+            
+            // Jambes stables avec transfert de poids
+            leftLeg.rotation.x = Math.sin(idleTime * 0.15) * 0.01;
+            rightLeg.rotation.x = Math.sin(idleTime * 0.15 + Math.PI) * 0.01;
+        }
+    }
+    
+    // Animation de coup de poing - Plus puissante et visible
+    animatePlayerPunch(playerGroup, isLeftPunch = true) {
+        if (!playerGroup.userData.animations) return;
+        
+        const { leftArm, rightArm, torso, head } = playerGroup.userData.animations;
+        const punchingArm = isLeftPunch ? leftArm : rightArm;
+        const otherArm = isLeftPunch ? rightArm : leftArm;
+        
+        // Position de garde de base
+        const guardPosition = -0.3;
+        const guardZ = isLeftPunch ? 0.2 : -0.2;
+        const otherGuardZ = isLeftPunch ? -0.2 : 0.2;
+        
+        // Bras qui frappe - Extension complète
+        new TWEEN.Tween(punchingArm.rotation)
+            .to({ x: 0.1, z: isLeftPunch ? -0.1 : 0.1 }, 120) // Extension vers l'avant
+            .easing(TWEEN.Easing.Quadratic.Out)
+            .chain(
+                // Retour rapide à la garde
+                new TWEEN.Tween(punchingArm.rotation)
+                    .to({ x: guardPosition, z: guardZ }, 200)
+                    .easing(TWEEN.Easing.Back.Out)
+            )
+            .start();
+            
+        // Autre bras reste en garde mais recule légèrement
+        new TWEEN.Tween(otherArm.rotation)
+            .to({ x: guardPosition - 0.1, z: otherGuardZ + (isLeftPunch ? -0.1 : 0.1) }, 120)
+            .easing(TWEEN.Easing.Quadratic.Out)
+            .chain(
+                new TWEEN.Tween(otherArm.rotation)
+                    .to({ x: guardPosition, z: otherGuardZ }, 200)
+                    .easing(TWEEN.Easing.Back.Out)
+            )
+            .start();
+            
+        // Rotation du torse pour plus de puissance
+        const originalTorsoRotation = torso.rotation.y;
+        new TWEEN.Tween(torso.rotation)
+            .to({ y: isLeftPunch ? -0.4 : 0.4 }, 120)
+            .easing(TWEEN.Easing.Quadratic.Out)
+            .chain(
+                new TWEEN.Tween(torso.rotation)
+                    .to({ y: originalTorsoRotation }, 250)
+                    .easing(TWEEN.Easing.Back.Out)
+            )
+            .start();
+            
+        // Mouvement de tête pour accompagner
+        const originalHeadRotation = head.rotation.y;
+        new TWEEN.Tween(head.rotation)
+            .to({ y: isLeftPunch ? -0.2 : 0.2 }, 120)
+            .easing(TWEEN.Easing.Quadratic.Out)
+            .chain(
+                new TWEEN.Tween(head.rotation)
+                    .to({ y: originalHeadRotation }, 250)
+                    .easing(TWEEN.Easing.Back.Out)
+            )
+            .start();
+    }
+    
+    // Animation de coup de pied avec mouvement des bras
+    animatePlayerKick(playerGroup, isLeftKick = true) {
+        if (!playerGroup.userData.animations) return;
+        
+        const { leftLeg, rightLeg, leftArm, rightArm, torso } = playerGroup.userData.animations;
+        const leg = isLeftKick ? leftLeg : rightLeg;
+        const oppositeArm = isLeftKick ? rightArm : leftArm; // Bras opposé pour l'équilibre
+        const sameArm = isLeftKick ? leftArm : rightArm;
+        
+        const originalLegRotation = leg.rotation.x;
+        const originalOppositeArmRotation = oppositeArm.rotation.x;
+        const originalSameArmRotation = sameArm.rotation.x;
+        const originalTorsoRotation = torso.rotation.y;
+        
+        // Animation de la jambe qui frappe
+        new TWEEN.Tween(leg.rotation)
+            .to({ x: Math.PI * 0.3 }, 200)
+            .easing(TWEEN.Easing.Quadratic.Out)
+            .chain(
+                new TWEEN.Tween(leg.rotation)
+                    .to({ x: -Math.PI * 0.2 }, 100)
+                    .easing(TWEEN.Easing.Quadratic.In)
+                    .chain(
+                        new TWEEN.Tween(leg.rotation)
+                            .to({ x: originalLegRotation }, 300)
+                            .easing(TWEEN.Easing.Back.Out)
+                    )
+            )
+            .start();
+            
+        // Bras opposé se lève pour l'équilibre (naturel lors d'un coup de pied)
+        new TWEEN.Tween(oppositeArm.rotation)
+            .to({ x: -Math.PI * 0.4, z: isLeftKick ? -0.3 : 0.3 }, 200)
+            .easing(TWEEN.Easing.Quadratic.Out)
+            .chain(
+                new TWEEN.Tween(oppositeArm.rotation)
+                    .to({ x: originalOppositeArmRotation, z: 0 }, 400)
+                    .easing(TWEEN.Easing.Back.Out)
+            )
+            .start();
+            
+        // Bras du même côté recule légèrement
+        new TWEEN.Tween(sameArm.rotation)
+            .to({ x: Math.PI * 0.1, z: isLeftKick ? 0.2 : -0.2 }, 200)
+            .easing(TWEEN.Easing.Quadratic.Out)
+            .chain(
+                new TWEEN.Tween(sameArm.rotation)
+                    .to({ x: originalSameArmRotation, z: 0 }, 400)
+                    .easing(TWEEN.Easing.Back.Out)
+            )
+            .start();
+            
+        // Rotation du torse pour plus de puissance
+        new TWEEN.Tween(torso.rotation)
+            .to({ y: isLeftKick ? 0.2 : -0.2 }, 150)
+            .easing(TWEEN.Easing.Quadratic.Out)
+            .chain(
+                new TWEEN.Tween(torso.rotation)
+                    .to({ y: originalTorsoRotation }, 350)
+                    .easing(TWEEN.Easing.Back.Out)
+            )
+            .start();
+    }
+    
+    // Animation de célébration
+    animatePlayerCelebration(playerGroup) {
+        if (!playerGroup.userData.animations) return;
+        
+        const { torso, head, leftArm, rightArm } = playerGroup.userData.animations;
+        
+        // Les bras en l'air
+        new TWEEN.Tween(leftArm.rotation)
+            .to({ x: -Math.PI * 0.8, z: Math.PI * 0.3 }, 500)
+            .easing(TWEEN.Easing.Back.Out)
+            .start();
+            
+        new TWEEN.Tween(rightArm.rotation)
+            .to({ x: -Math.PI * 0.8, z: -Math.PI * 0.3 }, 500)
+            .easing(TWEEN.Easing.Back.Out)
+            .start();
+            
+        // Saut de joie
+        const originalY = playerGroup.position.y;
+        new TWEEN.Tween(playerGroup.position)
+            .to({ y: originalY + 1 }, 400)
+            .easing(TWEEN.Easing.Quadratic.Out)
+            .chain(
+                new TWEEN.Tween(playerGroup.position)
+                    .to({ y: originalY }, 400)
+                    .easing(TWEEN.Easing.Bounce.Out)
+            )
+            .start();
+            
+        // Rotation de la tête
+        new TWEEN.Tween(head.rotation)
+            .to({ y: Math.PI * 0.1 }, 250)
+            .easing(TWEEN.Easing.Quadratic.InOut)
+            .chain(
+                new TWEEN.Tween(head.rotation)
+                    .to({ y: -Math.PI * 0.1 }, 250)
+                    .easing(TWEEN.Easing.Quadratic.InOut)
+                    .repeat(2)
+                    .yoyo(true)
+            )
+            .start();
     }
 
     createNameSprite(name, team, health = 100) {
@@ -500,12 +1109,20 @@ class SoccerBoxGame {
 
         // Événements souris
         document.addEventListener('mousedown', (e) => {
-            this.mouseState.clicked = true;
+            if (e.button === 0) { // Clic gauche = coup de poing
+                this.mouseState.clicked = true;
+            } else if (e.button === 2) { // Clic droit = coup de pied
+                this.mouseState.rightClicked = true;
+            }
             e.preventDefault();
         });
 
         document.addEventListener('mouseup', (e) => {
-            this.mouseState.clicked = false;
+            if (e.button === 0) {
+                this.mouseState.clicked = false;
+            } else if (e.button === 2) {
+                this.mouseState.rightClicked = false;
+            }
             e.preventDefault();
         });
 
@@ -545,6 +1162,8 @@ class SoccerBoxGame {
         }
 
         const punch = this.keys['Space'] || this.mouseState.clicked;
+        const kick = this.keys['KeyF'] || this.mouseState.rightClicked;
+        const testAnimation = this.keys['KeyT']; // Touche T pour test
 
         // Envoyer les mouvements au serveur
         if (Object.values(movement).some(v => v)) {
@@ -553,6 +1172,37 @@ class SoccerBoxGame {
 
         if (punch) {
             networkManager.sendPlayerPunch();
+            // Animation locale du coup de poing
+            const localPlayer = this.players.get(this.localPlayerId);
+            if (localPlayer) {
+                console.log("👊 Animation de coup de poing déclenchée !");
+                this.animatePlayerPunch(localPlayer, Math.random() > 0.5);
+            }
+        }
+
+        if (kick) {
+            // Animation locale du coup de pied immédiate
+            const localPlayer = this.players.get(this.localPlayerId);
+            if (localPlayer) {
+                console.log("🦶 Animation de coup de pied déclenchée !");
+                this.animatePlayerKick(localPlayer, Math.random() > 0.5);
+            }
+            // Envoyer coup de pied au serveur (si la fonction existe)
+            if (networkManager.sendPlayerKick) {
+                networkManager.sendPlayerKick();
+            }
+        }
+
+        // Test d'animation forcée avec T
+        if (testAnimation) {
+            const localPlayer = this.players.get(this.localPlayerId);
+            if (localPlayer && localPlayer.userData.animations) {
+                console.log("🧪 Test d'animation forcée !");
+                // Forcer une rotation visible du bras gauche
+                localPlayer.userData.animations.leftArm.rotation.x = Math.sin(Date.now() * 0.01) * 0.5;
+                localPlayer.userData.animations.rightArm.rotation.x = -Math.sin(Date.now() * 0.01) * 0.5;
+                localPlayer.userData.animations.torso.rotation.z = Math.sin(Date.now() * 0.005) * 0.2;
+            }
         }
     }
 
@@ -601,21 +1251,12 @@ class SoccerBoxGame {
     }
 
     animatePunch(playerId) {
-        const playerMesh = this.players.get(playerId);
-        if (!playerMesh) return;
+        const playerGroup = this.players.get(playerId);
+        if (!playerGroup) return;
 
-        const gloves = [playerMesh.userData.leftGlove, playerMesh.userData.rightGlove];
-        
-        gloves.forEach(glove => {
-            const originalPosition = glove.position.clone();
-            
-            // Animation de coup de poing
-            glove.position.z -= 0.5;
-            
-            setTimeout(() => {
-                glove.position.copy(originalPosition);
-            }, 200);
-        });
+        // Utiliser la nouvelle animation de coup de poing
+        const isLeftPunch = Math.random() > 0.5; // Alternance aléatoire
+        this.animatePlayerPunch(playerGroup, isLeftPunch);
     }
 
     updateCamera() {
@@ -643,8 +1284,38 @@ class SoccerBoxGame {
     animate() {
         requestAnimationFrame(() => this.animate());
 
+        // Mettre à jour les animations TWEEN
+        if (typeof TWEEN !== 'undefined') {
+            TWEEN.update();
+        }
+
         this.updatePlayerControls();
         this.updateCamera();
+        
+        // Animer tous les joueurs en mouvement
+        this.players.forEach((playerGroup, playerId) => {
+            if (playerGroup && playerGroup.userData && playerGroup.userData.animations) {
+                // Calculer la vitesse de déplacement depuis la position précédente
+                if (!playerGroup.userData.previousPosition) {
+                    playerGroup.userData.previousPosition = playerGroup.position.clone();
+                }
+                
+                const currentPos = playerGroup.position;
+                const prevPos = playerGroup.userData.previousPosition;
+                const deltaPos = new THREE.Vector3().subVectors(currentPos, prevPos);
+                const speed = deltaPos.length() * 60; // Vitesse approximative par seconde
+                
+                // Seuils pour marche et course
+                const isMoving = speed > 0.01; // Seuil plus bas pour détecter les petits mouvements
+                const isRunning = speed > 1; // Seuil plus bas aussi
+                
+                // Toujours animer (même en idle)
+                this.animatePlayerMovement(playerGroup, deltaPos.length() > 0.001 ? deltaPos.normalize() : new THREE.Vector3(), isRunning);
+                
+                // Mettre à jour la position précédente
+                playerGroup.userData.previousPosition.copy(currentPos);
+            }
+        });
         
         this.renderer.render(this.scene, this.camera);
     }
