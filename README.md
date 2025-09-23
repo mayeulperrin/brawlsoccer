@@ -59,9 +59,14 @@ Un jeu multijoueur innovant qui combine le football et la boxe dans un environne
 
 ## 🛠️ Installation
 
-### 1. Cloner/Télécharger le Projet
+### Prérequis
+- Node.js 14+ ([Télécharger](https://nodejs.org/))
+- NPM ou Yarn
+
+### 1. Cloner le Repository
 ```bash
-cd soccerbox
+git clone https://github.com/mayeulperrin/brawlsoccer.git
+cd brawlsoccer
 ```
 
 ### 2. Installer les Dépendances
@@ -69,17 +74,30 @@ cd soccerbox
 npm install
 ```
 
-### 3. Lancer le Serveur
-```bash
-# Mode production
-npm start
+### 3. Méthodes de Démarrage
 
-# Mode développement (avec rechargement automatique)
-npm run dev
+#### 🏃 Développement (démarrage simple)
+```bash
+npm start
+```
+
+#### 🚀 Production (avec PM2 - recommandé)
+```bash
+# Installer PM2 globalement
+npm install -g pm2
+
+# Déploiement automatique
+./pm2-deploy.sh prod
+
+# Ou manuellement
+npm run build
+cd dist && pm2 start server.js --name "brawlsoccer"
 ```
 
 ### 4. Ouvrir le Jeu
 Ouvrez votre navigateur et allez à : **http://localhost:3000**
+
+> 💡 **Pour la production, utilisez PM2** pour une meilleure stabilité et gestion automatique des redémarrages. Voir [PM2_README.md](./PM2_README.md) pour le guide complet.
 
 ## 🎮 Contrôles
 

@@ -5,10 +5,6 @@
 set -e
 
 # Configuration - MODIFIEZ CES VALEURS
-SERVER_USER="invidia"  
-SERVER_HOST="imay.fr"
-SERVER_PORT="22"
-DOMAIN="brawlsoccer.com"
 
 # Couleurs
 GREEN='\033[0;32m'
@@ -21,17 +17,6 @@ echo -e "${BLUE}🚀 Déploiement rapide de BrawlSoccer sur serveur Apache${NC}"
 # Vérifications
 if [ ! -f "server.js" ]; then
     echo "❌ Fichier server.js non trouvé. Exécutez depuis la racine du projet."
-    exit 1
-fi
-
-echo "📋 Configuration:"
-echo "   Serveur: $SERVER_USER@$SERVER_HOST:$SERVER_PORT"
-echo "   Domaine: $DOMAIN"
-echo ""
-
-read -p "Continuer ? (y/n): " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     exit 1
 fi
 
