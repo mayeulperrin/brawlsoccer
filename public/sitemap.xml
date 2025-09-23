@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
+        xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+    
+    <!-- Page principale -->
+    <url>
+        <loc>https://brawlsoccer.com/</loc>
+        <lastmod>2025-09-23</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+        <image:image>
+            <image:loc>https://brawlsoccer.com/images/homepage-preview.jpg</image:loc>
+            <image:title>BrawlSoccer - Jeu de Football-Boxe Multijoueur</image:title>
+            <image:caption>Capture d'écran du jeu BrawlSoccer montrant un match en action</image:caption>
+        </image:image>
+        <video:video>
+            <video:thumbnail_loc>https://brawlsoccer.com/images/video-thumbnail.jpg</video:thumbnail_loc>
+            <video:title>BrawlSoccer - Gameplay Trailer</video:title>
+            <video:description>Découvrez BrawlSoccer, le jeu qui révolutionne le sport en combinant football et boxe</video:description>
+            <video:content_loc>https://brawlsoccer.com/videos/gameplay-trailer.mp4</video:content_loc>
+            <video:duration>120</video:duration>
+            <video:publication_date>2025-09-23</video:date>
+            <video:family_friendly>yes</video:family_friendly>
+            <video:live>no</video:live>
+        </video:video>
+    </url>
+    
+    <!-- Page de jeu -->
+    <url>
+        <loc>https://brawlsoccer.com/jouer</loc>
+        <lastmod>2025-09-23</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+    </url>
+    
+    <!-- Page des règles -->
+    <url>
+        <loc>https://brawlsoccer.com/regles</loc>
+        <lastmod>2025-09-23</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    
+    <!-- Page À propos -->
+    <url>
+        <loc>https://brawlsoccer.com/a-propos</loc>
+        <lastmod>2025-09-23</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+
+</urlset>

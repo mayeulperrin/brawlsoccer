@@ -150,14 +150,16 @@ try {
         }
     });
 
-    // Copier le favicon
-    console.log('  - favicon.svg');
-    if (fs.existsSync(path.join(sourceDir, 'favicon.svg'))) {
-        fs.copyFileSync(
-            path.join(sourceDir, 'favicon.svg'),
-            path.join(buildDir, 'public', 'favicon.svg')
-        );
-    }
+    // Copier les fichiers SEO et PWA
+    console.log('  - Fichiers SEO et PWA');
+    const seoFiles = ['favicon.svg', 'manifest.json', 'sitemap.xml', 'robots.txt'];
+    seoFiles.forEach(file => {
+        const filePath = path.join(sourceDir, file);
+        if (fs.existsSync(filePath)) {
+            console.log(`    - ${file}`);
+            fs.copyFileSync(filePath, path.join(buildDir, 'public', file));
+        }
+    });
 
     // Créer un script de démarrage
     console.log('📋 Création des scripts...');

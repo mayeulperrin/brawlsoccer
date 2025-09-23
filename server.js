@@ -37,8 +37,7 @@ app.get('/api/sounds/:folder', (req, res) => {
             const ext = path.extname(file).toLowerCase();
             return ['.mp3', '.wav', '.ogg', '.m4a', '.aac'].includes(ext);
         });
-        
-        console.log(`📁 Fichiers audio trouvés dans ${folder}/:`, audioFiles);
+    
         res.json(audioFiles);
         
     } catch (error) {
