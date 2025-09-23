@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoccerBox - Jeu Multijoueur 3D</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="alternate icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%232d8f2d'/><circle cx='16' cy='16' r='3' fill='white'/></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            font-family: 'Arial', sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        /* Force l'input à être interactif */
+        #ui #loginScreen {
+            pointer-events: all;
+        }
+        
+        #ui #loginScreen * {
+            pointer-events: auto;
+        }
+
+        #loginScreen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            pointer-events: all;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #loginScreen h1 {
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        #loginScreen input {
+            padding: 12px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            pointer-events: auto !important;
+            cursor: text !important;
+        }
+
+        #loginScreen input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        #loginScreen button {
+            padding: 12px 30px;
+            margin: 10px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        #loginScreen button:hover {
+            transform: scale(1.05);
+        }
+
+        #scoreBoard {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            display: none;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #playersList {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #playersList h3 {
+            margin-bottom: 10px;
+            color: #4ecdc4;
+        }
+
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            font-size: 14px;
+        }
+
+        #gameMessage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 30px 50px;
+            border-radius: 15px;
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #koMessage {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(139, 0, 0, 0.9);
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #ff4444;
+            display: none;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 68, 68, 0.5);
+            box-shadow: 0 4px 15px rgba(139, 0, 0, 0.3);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .team-blue {
+            color: #4ecdc4;
+        }
+
+        .team-red {
+            color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="ui">
+            <!-- Écran de connexion -->
+            <div id="loginScreen">
+                <h1>⚽ SoccerBox ⚽</h1>
+                <p style="margin-bottom: 20px;">Football + Boxe = Action garantie !</p>
+                <input type="text" id="playerName" placeholder="Entrez votre pseudo" maxlength="20">
+                <br>
+                <button id="joinGameBtn">🥊 Rejoindre la partie</button>
+                <div style="margin-top: 20px; font-size: 14px; color: rgba(255, 255, 255, 0.8);">
+                    <p><strong>Contrôles :</strong></p>
+                    <p>ZQSD ou ↑←↓→ : Se déplacer</p>
+                    <p>Espace ou Clic : Coup de poing</p>
+                    <p>Pieds seulement pour le ballon !</p>
+                </div>
+            </div>
+
+            <!-- Tableau des scores -->
+            <div id="scoreBoard">
+                <span class="team-blue">Équipe Bleue</span> 
+                <span id="blueScore">0</span> - <span id="redScore">0</span> 
+                <span class="team-red">Équipe Rouge</span>
+            </div>
+
+            <!-- Liste des joueurs -->
+            <div id="playersList">
+                <h3>Joueurs connectés</h3>
+                <div id="playersContent"></div>
+            </div>
+
+            <!-- Contrôles -->
+            <div id="controls">
+                <h4>🎮 Contrôles</h4>
+                <p><strong>Z Q S D</strong> ou <strong>↑ ← ↓ →</strong> : Déplacer</p>
+                <p><strong>Espace</strong> ou <strong>Clic souris</strong> : Coup de poing</p>
+                <p><strong>Pieds uniquement</strong> pour toucher le ballon</p>
+            </div>
+
+            <!-- Messages de jeu -->
+            <div id="gameMessage"></div>
+            
+            <!-- Messages KO en haut à gauche -->
+            <div id="koMessage"></div>
+        </div>
+    </div>
+
+    <!-- Diagnostic d'abord -->
+    <script src="js/diagnostic.js"></script>
+    
+    <!-- Chargement des librairies avec gestion d'erreurs -->
+    <script>
+        // Compteur de librairies chargées
+        window.librariesLoaded = {
+            three: false,
+            cannon: false,
+            socketio: false,
+            count: 0,
+            total: 3
+        };
+
+        // Fonction de vérification du chargement
+        function checkLibrariesLoaded() {
+            if (window.librariesLoaded.count >= window.librariesLoaded.total) {
+                diagnostic.logStep('Toutes les librairies chargées', 'success');
+                diagnostic.checkLibraries();
+                loadGameScripts();
+            }
+        }
+
+        // Fonction globale temporaire pour joinGame
+        window.joinGame = function() {
+            alert('⏳ Chargement en cours... Veuillez patienter que tous les modules soient prêts.');
+        };
+
+        // Fonction pour charger les scripts du jeu
+        function loadGameScripts() {
+            const scripts = [
+                'js/game.js',
+                'js/physics.js', 
+                'js/network.js',
+                'js/ui.js',
+                'js/main.js'
+            ];
+
+            let loadedScripts = 0;
+            
+            scripts.forEach((src, index) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = () => {
+                    loadedScripts++;
+                    diagnostic.logStep(`Script chargé`, 'success', src);
+                    if (loadedScripts === scripts.length) {
+                        diagnostic.logStep('Tous les scripts de jeu chargés', 'success');
+                        
+                        // Attendre un peu puis initialiser les événements
+                        setTimeout(() => {
+                            initializeGameEvents();
+                        }, 500);
+                    }
+                };
+                script.onerror = () => {
+                    diagnostic.logStep(`Erreur de chargement script`, 'error', src);
+                };
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Initialiser les événements une fois tous les scripts chargés
+        function initializeGameEvents() {
+            console.log('🎮 Initialisation des événements de jeu (sans toucher à l\'input)...');
+            
+            // NE PAS toucher à l'input ici - il est géré par le script DOMContentLoaded
+            
+            const joinBtn = document.getElementById('joinGameBtn');
+            if (joinBtn && window.uiManager) {
+                joinBtn.onclick = () => {
+                    if (window.uiManager && typeof window.uiManager.joinGame === 'function') {
+                        window.uiManager.joinGame();
+                    } else {
+                        alert('❌ Système de jeu non encore prêt. Rechargez la page.');
+                    }
+                };
+                
+                // Remplacer la fonction globale temporaire
+                window.joinGame = () => {
+                    if (window.uiManager && typeof window.uiManager.joinGame === 'function') {
+                        window.uiManager.joinGame();
+                    } else {
+                        alert('❌ Système de jeu non encore prêt. Rechargez la page.');
+                    }
+                };
+                
+                diagnostic.logStep('Événements jeu initialisés', 'success');
+            }
+        }
+    </script>
+
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" 
+            onload="diagnostic.logStep('Three.js chargé', 'success'); window.librariesLoaded.three = true; window.librariesLoaded.count++; checkLibrariesLoaded();"
+            onerror="diagnostic.logStep('Three.js', 'error', 'Impossible de charger depuis CDN'); alert('Impossible de charger Three.js. Vérifiez votre connexion internet.');"></script>
+    
+    <!-- Cannon.js - Essayer plusieurs CDN en fallback -->
+    <script>
+        function loadCannonJS() {
+            const cannonSources = [
+                'cannon.min.js', // Fichier local en priorité (plus rapide)
+                'https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.js',
+                'https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js'
+            ];
+            
+            let currentIndex = 0;
+            
+            function tryLoadCannon() {
+                if (currentIndex >= cannonSources.length) {
+                    diagnostic.logStep('Cannon.js', 'error', 'Tous les CDN ont échoué');
+                    // Créer un fallback minimal pour éviter les erreurs
+                    createCannonFallback();
+                    return;
+                }
+                
+                const script = document.createElement('script');
+                script.src = cannonSources[currentIndex];
+                
+                script.onload = () => {
+                    if (typeof CANNON !== 'undefined') {
+                        diagnostic.logStep('Cannon.js chargé', 'success', `Depuis: ${cannonSources[currentIndex]}`);
+                        window.librariesLoaded.cannon = true; 
+                        window.librariesLoaded.count++; 
+                        checkLibrariesLoaded();
+                    } else {
+                        // Le script s'est chargé mais CANNON n'est pas défini
+                        diagnostic.logStep('Cannon.js', 'warning', `Script chargé mais CANNON non défini`);
+                        currentIndex++;
+                        tryLoadCannon();
+                    }
+                };
+                
+                script.onerror = () => {
+                    diagnostic.logStep('Cannon.js', 'warning', `CDN ${currentIndex + 1} échoué, essai suivant...`);
+                    currentIndex++;
+                    tryLoadCannon();
+                };
+                
+                document.head.appendChild(script);
+            }
+            
+            // Fallback minimal en cas d'échec complet
+            function createCannonFallback() {
+                diagnostic.logStep('Cannon.js', 'warning', 'Création fallback minimal');
+                
+                // Créer un objet CANNON minimal pour éviter les erreurs (compatible 0.6.2)
+                window.CANNON = {
+                    World: function() {
+                        this.gravity = { set: function() {} };
+                        this.broadphase = new CANNON.NaiveBroadphase();
+                        this.solver = { iterations: 10 };
+                        this.step = function() {};
+                        this.add = function() {};
+                        this.remove = function() {};
+                        this.addContactMaterial = function() {};
+                    },
+                    Vec3: function(x, y, z) {
+                        this.x = x || 0;
+                        this.y = y || 0;
+                        this.z = z || 0;
+                        this.set = function(x, y, z) { this.x = x; this.y = y; this.z = z; };
+                        this.distanceTo = function() { return 0; };
+                        this.clone = function() { return new CANNON.Vec3(this.x, this.y, this.z); };
+                        this.normalize = function() { return this; };
+                        this.scale = function() { return this; };
+                        this.negate = function() { return this; };
+                    },
+                    Body: function(options) {
+                        this.mass = options?.mass || 0;
+                        this.material = options?.material || null;
+                        this.position = new CANNON.Vec3();
+                        this.velocity = new CANNON.Vec3();
+                        this.angularVelocity = new CANNON.Vec3();
+                        this.quaternion = { 
+                            set: function() {},
+                            setFromAxisAngle: function() {}
+                        };
+                        this.addShape = function() {};
+                        this.applyForce = function() {};
+                        this.applyImpulse = function() {};
+                        this.linearDamping = 0.01;
+                        this.angularDamping = 0.01;
+                        this.fixedRotation = false;
+                        this.updateMassProperties = function() {};
+                    },
+                    Material: function(name) {
+                        this.name = name || '';
+                    },
+                    ContactMaterial: function(mat1, mat2, options) {
+                        this.materials = [mat1, mat2];
+                        this.friction = options?.friction || 0.3;
+                        this.restitution = options?.restitution || 0.3;
+                        this.contactEquationStiffness = options?.contactEquationStiffness || 1e7;
+                        this.contactEquationRelaxation = options?.contactEquationRelaxation || 3;
+                    },
+                    Box: function(size) {
+                        this.halfExtents = size;
+                    },
+                    Sphere: function(radius) {
+                        this.radius = radius;
+                    },
+                    Plane: function() {},
+                    Cylinder: function(radiusTop, radiusBottom, height, numSegments) {
+                        this.radiusTop = radiusTop;
+                        this.radiusBottom = radiusBottom;
+                        this.height = height;
+                        this.numSegments = numSegments || 8;
+                    },
+                    NaiveBroadphase: function() {},
+                    RaycastResult: function() {
+                        this.hasHit = false;
+                        this.hitPointWorld = new CANNON.Vec3();
+                        this.body = null;
+                        this.distance = 0;
+                    },
+                    version: '0.6.2-fallback'
+                };
+                
+                window.librariesLoaded.cannon = true;
+                window.librariesLoaded.count++;
+                checkLibrariesLoaded();
+                
+                alert('⚠️ Cannon.js non disponible. Le jeu fonctionnera en mode physique simplifiée.');
+            }
+            
+            tryLoadCannon();
+        }
+        
+        // Démarrer le chargement de Cannon.js
+        loadCannonJS();
+    </script>
+    
+    <!-- Socket.IO -->
+    <script src="/socket.io/socket.io.js"
+            onload="diagnostic.logStep('Socket.IO chargé', 'success'); window.librariesLoaded.socketio = true; window.librariesLoaded.count++; checkLibrariesLoaded();"
+            onerror="diagnostic.logStep('Socket.IO', 'error', 'Serveur non disponible'); alert('Impossible de charger Socket.IO. Le serveur est-il démarré ?');"></script>
+
+    <!-- Initialisation SIMPLE de l'input (copie de la version qui fonctionne) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('� Page principale chargée');
+            
+            const playerInput = document.getElementById('playerName');
+            
+            if (playerInput) {
+                // Tests sur l'input
+                console.log(`Input disabled: ${playerInput.disabled}`);
+                console.log(`Input pointer-events: ${getComputedStyle(playerInput).pointerEvents}`);
+                console.log(`Input cursor: ${getComputedStyle(playerInput).cursor}`);
+                
+                // Événements (identiques à la version qui fonctionne)
+                playerInput.addEventListener('input', function() {
+                    console.log(`✅ Saisie détectée: "${this.value}"`);
+                });
+                
+                playerInput.addEventListener('focus', function() {
+                    console.log('🎯 Focus obtenu sur l\'input');
+                });
+                
+                playerInput.addEventListener('blur', function() {
+                    console.log('👋 Focus perdu sur l\'input');
+                });
+                
+                playerInput.addEventListener('click', function() {
+                    console.log('🖱️ Clic détecté sur l\'input');
+                });
+                
+                // Focus automatique (comme la version qui fonctionne)
+                setTimeout(() => {
+                    playerInput.focus();
+                    console.log('🎯 Focus automatique appliqué');
+                }, 500);
+            }
+        });
+    </script>
+</body>
+</html>

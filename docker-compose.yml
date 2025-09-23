@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  soccerbox:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - MAX_PLAYERS=8
+    restart: unless-stopped
+    networks:
+      - soccerbox-network
+    
+    # Ressources (optionnel)
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+    
+    # Volumes pour persistance (optionnel)
+    volumes:
+      - ./logs:/app/logs
+    
+    # Santé du conteneur
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # Service nginx optionnel pour reverse proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - soccerbox
+    networks:
+      - soccerbox-network
+    profiles:
+      - production
+
+networks:
+  soccerbox-network:
+    driver: bridge
+
+volumes:
+  soccerbox-logs:
+    driver: local
