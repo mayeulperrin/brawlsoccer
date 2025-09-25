@@ -64,197 +64,13 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="BrawlSoccer">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    
+    <meta name="application-name" content="BrawlSoccer">
+    <meta name="msapplication-TileColor" content="#2d8f2d">
+    <meta name="msapplication-TileImage" content="/mstile-150x150.png">
 
-        body {
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
-            font-family: 'Arial', sans-serif;
-            color: white;
-            overflow: hidden;
-        }
-
-        #gameContainer {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-        }
-
-        #gameCanvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-
-        #ui {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 100;
-        }
-        
-        /* Force l'input à être interactif */
-        #ui #loginScreen {
-            pointer-events: all;
-        }
-        
-        #ui #loginScreen * {
-            pointer-events: auto;
-        }
-
-        #loginScreen {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            pointer-events: all;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        #loginScreen h1 {
-            margin-bottom: 20px;
-            font-size: 2.5em;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        #loginScreen input {
-            padding: 12px 20px;
-            margin: 10px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            pointer-events: auto !important;
-            cursor: text !important;
-        }
-
-        #loginScreen input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        #loginScreen button {
-            padding: 12px 30px;
-            margin: 10px;
-            border: none;
-            border-radius: 8px;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        #loginScreen button:hover {
-            transform: scale(1.05);
-        }
-
-        #scoreBoard {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px 30px;
-            border-radius: 10px;
-            font-size: 24px;
-            font-weight: bold;
-            display: none;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        #playersList {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 10px;
-            display: none;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        #playersList h3 {
-            margin-bottom: 10px;
-            color: #4ecdc4;
-        }
-
-        #controls {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 10px;
-            display: none;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            font-size: 14px;
-        }
-
-        #gameMessage {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            padding: 30px 50px;
-            border-radius: 15px;
-            font-size: 32px;
-            font-weight: bold;
-            text-align: center;
-            display: none;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-
-        #koMessage {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(139, 0, 0, 0.9);
-            padding: 15px 25px;
-            border-radius: 10px;
-            font-size: 20px;
-            font-weight: bold;
-            color: #ff4444;
-            display: none;
-            backdrop-filter: blur(10px);
-            border: 2px solid rgba(255, 68, 68, 0.5);
-            box-shadow: 0 4px 15px rgba(139, 0, 0, 0.3);
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .team-blue {
-            color: #4ecdc4;
-        }
-
-        .team-red {
-            color: #ff6b6b;
-        }
-    </style>
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles/styles.css">
     
     <!-- Données structurées JSON-LD pour Google -->
     <script type="application/ld+json">
@@ -385,22 +201,13 @@
                 <div id="playersContent"></div>
             </div>
 
-            <!-- Contrôles -->
-            <div id="controls">
-                <h4>🎮 Contrôles</h4>
-                <p><strong>W A S D</strong> ou <strong>↑ ← ↓ →</strong> : Déplacer</p>
-                <p><strong>Espace</strong> ou <strong>Clic gauche</strong> : Coup de poing 👊</p>
-                <p><strong>F</strong> ou <strong>Clic droit</strong> : Coup de pied 🦶</p>
-                <p><strong>T</strong> : Test d'animations 🧪</p>
-                <p><strong>Les pieds</strong> touchent le ballon automatiquement</p>
-                <p><em>Animations réalistes lors des mouvements !</em></p>
-            </div>
-
             <!-- Messages de jeu -->
             <div id="gameMessage"></div>
             
             <!-- Messages KO en haut à gauche -->
-            <div id="koMessage"></div>
+            <div id="koMessage" class="hidden">
+                Vous êtes KO ! Attendez la prochaine partie...
+            </div>
         </div>
     </div>
 
@@ -435,6 +242,7 @@
         // Fonction pour charger les scripts du jeu
         function loadGameScripts() {
             const scripts = [
+                'js/mobile-controls.js', // Charger les contrôles mobiles en PREMIER
                 'js/game.js',
                 'js/physics.js', 
                 'js/network.js',
@@ -468,12 +276,24 @@
         
         // Initialiser les événements une fois tous les scripts chargés
         function initializeGameEvents() {
+            // Initialiser les contrôles mobiles immédiatement
+            if (MobileControls && MobileControls.isMobileDevice()) {
+                window.mobileControls = new MobileControls();
+                console.log('📱 Contrôles mobiles initialisés depuis index.html');
+            }
             
             const joinBtn = document.getElementById('joinGameBtn');
             if (joinBtn && window.uiManager) {
                 joinBtn.onclick = () => {
                     if (window.uiManager && typeof window.uiManager.joinGame === 'function') {
                         window.uiManager.joinGame();
+                        
+                        // Afficher les contrôles mobiles quand on rejoint
+                        if (window.mobileControls) {
+                            setTimeout(() => {
+                                window.mobileControls.show();
+                            }, 1000);
+                        }
                     } else {
                         alert('❌ Système de jeu non encore prêt. Rechargez la page.');
                     }
@@ -483,6 +303,13 @@
                 window.joinGame = () => {
                     if (window.uiManager && typeof window.uiManager.joinGame === 'function') {
                         window.uiManager.joinGame();
+                        
+                        // Afficher les contrôles mobiles
+                        if (window.mobileControls) {
+                            setTimeout(() => {
+                                window.mobileControls.show();
+                            }, 1000);
+                        }
                     } else {
                         alert('❌ Système de jeu non encore prêt. Rechargez la page.');
                     }
@@ -598,21 +425,39 @@
                         this.materials = [mat1, mat2];
                         this.friction = options?.friction || 0.3;
                         this.restitution = options?.restitution || 0.3;
-                        this.contactEquationStiffness = options?.contactEquationStiffness || 1e7;
-                        this.contactEquationRelaxation = options?.contactEquationRelaxation || 3;
+                        this.stiffness = options?.stiffness || 1e6;
+                        this.rollingFriction = options?.rollingFriction || 0.1;
                     },
-                    Box: function(size) {
-                        this.halfExtents = size;
+                    Plane: function(normal, constant) {
+                        this.normal = normal || new CANNON.Vec3(0, 1, 0);
+                        this.constant = constant || 0;
                     },
-                    Sphere: function(radius) {
+                    Box: function(width, height, depth, numSegments) {
+                        this.width = width;
+                        this.height = height;
+                        this.depth = depth;
+                        this.numSegments = numSegments || 8;
+                    },
+                    Sphere: function(radius, numSegments) {
                         this.radius = radius;
+                        this.numSegments = numSegments || 8;
                     },
-                    Plane: function() {},
                     Cylinder: function(radiusTop, radiusBottom, height, numSegments) {
                         this.radiusTop = radiusTop;
                         this.radiusBottom = radiusBottom;
                         this.height = height;
                         this.numSegments = numSegments || 8;
+                    },
+                    Cone: function(radius, height, numSegments) {
+                        this.radius = radius;
+                        this.height = height;
+                        this.numSegments = numSegments || 8;
+                    },
+                    Torus: function(radius, tube, radialSegments, tubularSegments) {
+                        this.radius = radius;
+                        this.tube = tube;
+                        this.radialSegments = radialSegments || 8;
+                        this.tubularSegments = tubularSegments || 8;
                     },
                     NaiveBroadphase: function() {},
                     RaycastResult: function() {

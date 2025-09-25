@@ -106,6 +106,8 @@ class NetworkManager {
         this.socket.on('player-hit', (data) => {
             const { attackerId, targetId, damage, newHealth, knockout } = data;
             
+            game.animatePunch(attackerId);
+
             // Mettre à jour la barre de vie
             if (game && game.updatePlayerData) {
                 game.updatePlayerData(targetId, newHealth);

@@ -867,7 +867,7 @@ class SoccerBoxGame {
         const { leftArm, rightArm, torso, head } = playerGroup.userData.animations;
         const punchingArm = isLeftPunch ? leftArm : rightArm;
         const otherArm = isLeftPunch ? rightArm : leftArm;
-        
+
         // Position de garde de base
         const guardPosition = -0.3;
         const guardZ = isLeftPunch ? 0.2 : -0.2;
@@ -1238,6 +1238,8 @@ class SoccerBoxGame {
     animatePunch(playerId) {
         const playerGroup = this.players.get(playerId);
         if (!playerGroup) return;
+
+        console.log(`👊 Animation de coup de poing pour le joueur ${playerId}`);
 
         // Utiliser la nouvelle animation de coup de poing
         const isLeftPunch = Math.random() > 0.5; // Alternance aléatoire

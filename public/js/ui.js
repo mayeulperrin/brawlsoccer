@@ -9,7 +9,6 @@ class UIManager {
             redScore: document.getElementById('redScore'),
             playersList: document.getElementById('playersList'),
             playersContent: document.getElementById('playersContent'),
-            controls: document.getElementById('controls'),
             gameMessage: document.getElementById('gameMessage')
         };
         
@@ -63,11 +62,6 @@ class UIManager {
 
         // Raccourcis clavier globaux
         document.addEventListener('keydown', (e) => {
-            // Échap pour afficher/masquer les contrôles
-            if (e.key === 'Escape') {
-                this.toggleControls();
-            }
-            
             // F1 pour les statistiques (debug)
             if (e.key === 'F1') {
                 e.preventDefault();
@@ -119,7 +113,6 @@ class UIManager {
         this.elements.loginScreen.classList.remove('hidden');
         this.elements.scoreBoard.style.display = 'none';
         this.elements.playersList.style.display = 'none';
-        this.elements.controls.style.display = 'none';
         this.elements.playerName.focus();
     }
 
@@ -130,13 +123,11 @@ class UIManager {
     showGameUI() {
         this.elements.scoreBoard.style.display = 'block';
         this.elements.playersList.style.display = 'block';
-        this.elements.controls.style.display = 'block';
     }
 
     hideGameUI() {
         this.elements.scoreBoard.style.display = 'none';
         this.elements.playersList.style.display = 'none';
-        this.elements.controls.style.display = 'none';
     }
 
     // Statut de connexion
@@ -168,18 +159,6 @@ class UIManager {
     updateScore(score) {
         this.elements.blueScore.textContent = score.blue;
         this.elements.redScore.textContent = score.red;
-        
-        // Animation du score
-        this.animateScoreUpdate();
-    }
-
-    animateScoreUpdate() {
-        this.elements.scoreBoard.style.transform = 'scale(1.1)';
-        this.elements.scoreBoard.style.transition = 'transform 0.2s';
-        
-        setTimeout(() => {
-            this.elements.scoreBoard.style.transform = 'scale(1)';
-        }, 200);
     }
 
     // Liste des joueurs - Optimisation du cooldown pour plus de réactivité
@@ -333,12 +312,6 @@ class UIManager {
         }, 2000);
     }
 
-    // Afficher/masquer les contrôles
-    toggleControls() {
-        const isVisible = this.elements.controls.style.display !== 'none';
-        this.elements.controls.style.display = isVisible ? 'none' : 'block';
-    }
-
     // Informations de debug
     showDebugInfo() {
         const stats = networkManager.getConnectionStats();
@@ -390,19 +363,6 @@ class UIManager {
     updateLayout() {
         const width = window.innerWidth;
         const height = window.innerHeight;
-        
-        // Adapter la taille des éléments UI pour mobile
-        if (width < 768) {
-            this.elements.scoreBoard.style.fontSize = '18px';
-            this.elements.playersList.style.fontSize = '12px';
-            this.elements.controls.style.fontSize = '12px';
-            this.elements.controls.style.bottom = '10px';
-        } else {
-            this.elements.scoreBoard.style.fontSize = '24px';
-            this.elements.playersList.style.fontSize = '14px';
-            this.elements.controls.style.fontSize = '14px';
-            this.elements.controls.style.bottom = '20px';
-        }
     }
 
     // Notifications push (si supportées)
