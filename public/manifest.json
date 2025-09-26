@@ -41,13 +41,13 @@
     ],
     "screenshots": [
         {
-            "src": "/images/screenshot-desktop.jpg",
+            "src": "/medias/images/screenshots/screenshot-desktop.jpg",
             "sizes": "1280x720",
             "type": "image/jpeg",
             "form_factor": "wide"
         },
         {
-            "src": "/images/screenshot-mobile.jpg",
+            "src": "/medias/images/screenshots/screenshot-mobile.jpg",
             "sizes": "640x360",
             "type": "image/jpeg",
             "form_factor": "narrow"

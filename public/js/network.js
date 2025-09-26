@@ -120,12 +120,12 @@ class NetworkManager {
                 const targetName = game.getPlayerNameById(targetId);
                 game.showKOMessage(`💀 ${targetName} est K.O. !`, 2000);
                 
-                // Son de KO
-                this.playRandomSoundFallback('ko', 0.8);
+                // Son de KO via SoundManager
+                soundManager.playKOSound();
             }
             
-            // Son d'impact
-            this.playRandomSoundFallback('kick', 0.6);
+            // Son d'impact via SoundManager
+            soundManager.playKickSound();
         });
 
         // Réapparition d'un joueur
@@ -154,8 +154,8 @@ class NetworkManager {
             // Effets visuels
             this.showGoalEffect(team);
             
-            // Son de but - son aléatoire de goal
-            this.playRandomSoundFallback('goal', 0.7);
+            // Son de but via SoundManager
+            soundManager.playGoalSound();
         });
 
         // Fin de partie
@@ -173,8 +173,6 @@ class NetworkManager {
             
             game.showGameMessage(message, 5000);
             uiManager.showGameEnd(winner, finalScore);
-            
-            // Plus de son automatique - seulement les sons des dossiers medias
         });
 
         // Événements de débogage
@@ -383,22 +381,6 @@ class NetworkManager {
 
         animateParticles();
     }
-
-    // OPTIMISATION: Audio avec cache simple
-    async playRandomSoundFallback(folder, volume = 0.5) {
-        const commonNames = ['1.mp3', '2.mp3', '3.mp3', '4.mp3', '5.mp3', '6.mp3'];
-        const randomFile = commonNames[Math.floor(Math.random() * commonNames.length)];
-        
-        try {
-            const audio = new Audio(`medias/${folder}/${randomFile}`);
-            audio.volume = volume;
-            audio.play().catch(() => {});
-        } catch (error) {
-            // Ignorer les erreurs audio
-        }
-    }
-
-
 
     // Traitement du buffer de mouvement
     processMovementBuffer() {

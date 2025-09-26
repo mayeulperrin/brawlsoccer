@@ -1239,8 +1239,6 @@ class SoccerBoxGame {
         const playerGroup = this.players.get(playerId);
         if (!playerGroup) return;
 
-        console.log(`👊 Animation de coup de poing pour le joueur ${playerId}`);
-
         // Utiliser la nouvelle animation de coup de poing
         const isLeftPunch = Math.random() > 0.5; // Alternance aléatoire
         this.animatePlayerPunch(playerGroup, isLeftPunch);
