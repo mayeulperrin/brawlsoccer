@@ -867,10 +867,7 @@ class SoccerBoxGame {
         }
         if (punch) {
             networkManager.sendPlayerPunch();
-            const localPlayer = this.players.get(this.localPlayerId);
-            if (localPlayer) {
-                this.animatePlayerPunch(localPlayer, Math.random() > 0.5);
-            }
+            this.animatePunch(this.localPlayerId);
         }
         if (kick) {
             const localPlayer = this.players.get(this.localPlayerId);

@@ -11,7 +11,7 @@ class SoundManager {
             kick: ['1.mp3', '2.mp3', '3.mp3', '4.mp3', '5.mp3', '6.mp3'],
             goal: ['1.mp3', '2.mp3', '3.mp3', '4.mp3', '5.mp3', '6.mp3'],
             ko: ['1.mp3', '2.mp3', '3.mp3', '4.mp3', '5.mp3', '6.mp3'],
-            ambient: ['ambient1.mp3', 'ambient2.mp3', 'crowd.mp3']
+            // ambient: ['ambient1.mp3', 'ambient2.mp3', 'crowd.mp3']
         };
         
         this.init();

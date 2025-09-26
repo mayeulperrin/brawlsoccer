@@ -182,9 +182,13 @@ io.on('connection', (socket) => {
         const player = gameState.players.get(socket.id);
         if (!player || player.isKnockedOut) return;
 
-        const { direction, running } = data;
-        const speed = running ? 15 : 10; // Vitesse rapide mais fluide
+        const { direction, rotation, running } = data;
+        const speed = running ? 10 : 4;
         const factor = 0.6;
+
+        if (running) {
+            player.takeDamage(0.1);
+        }
         
         // Mouvement fluide avec vélocité - MÊMES contrôles pour tous
         if (direction.forward) player.velocity.z -= speed * factor;
@@ -202,7 +206,11 @@ io.on('connection', (socket) => {
 
         // Vérifier les collisions avec d'autres joueurs
         const punchRange = 3;
-        const punchDamage = 25;
+        let punchDamage = 20;
+
+        if (player.health <= 50) {
+            punchDamage = 25;
+        }
 
         gameState.players.forEach((target, targetId) => {
             if (targetId === socket.id || target.isKnockedOut) return;

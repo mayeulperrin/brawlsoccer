@@ -1,8 +1,5 @@
 // main.js - Point d'entrée principal du jeu
 
-// Variables globales
-let diagnostic, uiManager, networkManager, mobileControls, game, physicsManager;
-
 // Initialisation principale
 function initializeGame() {
     try {

@@ -375,17 +375,6 @@ class SoccerBoxGame {
         const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
         rightEye.position.set(0.15, 2.65, 0.35);
         playerGroup.add(rightEye);
-        
-        // Casque/bandeau d'équipe
-        const helmetGeometry = new THREE.SphereGeometry(0.47, 16, 8, 0, Math.PI * 2, 0, Math.PI * 0.7);
-        const helmetMaterial = new THREE.MeshPhongMaterial({ 
-            color: colors.accent,
-            transparent: true,
-            opacity: 0.7
-        });
-        const helmet = new THREE.Mesh(helmetGeometry, helmetMaterial);
-        helmet.position.y = 2.6;
-        playerGroup.add(helmet);
 
         // === BRAS ARTICULÉS ===
         // Épaules plus douces et arrondies
@@ -442,8 +431,8 @@ class SoccerBoxGame {
         playerGroup.add(rightElbow);
 
         // === GANTS DE BOXE AMÉLIORÉS ===
-        const gloveGeometry = new THREE.SphereGeometry(0.22, 12, 8);
-                gloveGeometry.scale(1.1, 0.8, 1.2); // Forme plus réaliste
+        const gloveGeometry = new THREE.SphereGeometry(0.24, 12, 8);
+                gloveGeometry.scale(2.1, 0.8, 1.2); // Forme plus réaliste
 
         const gloveMaterial = new THREE.MeshPhongMaterial({ 
             color: 0xDC143C,
@@ -578,7 +567,6 @@ class SoccerBoxGame {
             leftLeg: leftLeg,
             rightLeg: rightLeg,
             aura: aura,
-            helmet: helmet,
             playerId: playerData.id,
             team: playerData.team,
             colors: colors,
@@ -822,10 +810,10 @@ class SoccerBoxGame {
             rightLeg.rotation.x = rightLegPhase * baseSpeed * 20;
             
             // BRAS IMMOBILES pendant la marche - position de garde de boxe
-            leftArm.rotation.x = -0.3; // Position de garde fixe
-            rightArm.rotation.x = -0.3; // Position de garde fixe
-            leftArm.rotation.z = 0.2;   // Coudes écartés
-            rightArm.rotation.z = -0.2; // Coudes écartés
+            // leftArm.rotation.x = -0.3; // Position de garde fixe
+            // rightArm.rotation.x = -0.3; // Position de garde fixe
+            // leftArm.rotation.z = 0.2;   // Coudes écartés
+            // rightArm.rotation.z = -0.2; // Coudes écartés
             
             // Légère oscillation du torse seulement
             torso.rotation.z = Math.sin(walkCycle * 0.5) * baseSpeed * 2;
@@ -862,134 +850,56 @@ class SoccerBoxGame {
     
     // Animation de coup de poing - Plus puissante et visible
     animatePlayerPunch(playerGroup, isLeftPunch = true) {
-        if (!playerGroup.userData.animations) return;
+        if (!playerGroup.userData.animations) {
+            console.warn("⚠️ Pas d'animations disponibles pour ce joueur");
+            return;
+        }
         
-        const { leftArm, rightArm, torso, head } = playerGroup.userData.animations;
-        const punchingArm = isLeftPunch ? leftArm : rightArm;
-        const otherArm = isLeftPunch ? rightArm : leftArm;
+        const { torso, head, leftArm, rightArm, leftLeg, rightLeg } = playerGroup.userData.animations;
+        const time = Date.now() * 0.001;
 
         // Position de garde de base
         const guardPosition = -0.3;
         const guardZ = isLeftPunch ? 0.2 : -0.2;
         const otherGuardZ = isLeftPunch ? -0.2 : 0.2;
         
-        // Bras qui frappe - Extension complète
-        new TWEEN.Tween(punchingArm.rotation)
-            .to({ x: 0.1, z: isLeftPunch ? -0.1 : 0.1 }, 120) // Extension vers l'avant
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .chain(
-                // Retour rapide à la garde
-                new TWEEN.Tween(punchingArm.rotation)
-                    .to({ x: guardPosition, z: guardZ }, 200)
-                    .easing(TWEEN.Easing.Back.Out)
-            )
-            .start();
+        // Phase d'animation du coup de poing (rapide)
+        const punchTime = time + 0.1 * 15; // Vitesse d'animation
+        const punchPhase = Math.sin(punchTime);
+        // const punchIntensity = 10000 * punchPhase; // Seulement la phase positive
+        const punchIntensity = 1; // Seulement la phase positive
+
+        if (isLeftPunch) {
+            // Bras gauche qui frappe
+            leftArm.rotation.x = guardPosition + (punchIntensity); // Extension vers l'avant
+            leftArm.rotation.z = guardZ + (punchIntensity); // Rotation du bras
+            leftArm.rotation.y = guardZ + (punchIntensity); // Rotation du bras
             
-        // Autre bras reste en garde mais recule légèrement
-        new TWEEN.Tween(otherArm.rotation)
-            .to({ x: guardPosition - 0.1, z: otherGuardZ + (isLeftPunch ? -0.1 : 0.1) }, 120)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .chain(
-                new TWEEN.Tween(otherArm.rotation)
-                    .to({ x: guardPosition, z: otherGuardZ }, 200)
-                    .easing(TWEEN.Easing.Back.Out)
-            )
-            .start();
+            // Bras droit reste en garde mais recule légèrement
+            rightArm.rotation.x = guardPosition - (punchIntensity * 0.1);
+            rightArm.rotation.z = otherGuardZ + (punchIntensity * -0.1);
+        } else {
+            // Bras droit qui frappe
+            rightArm.rotation.x = guardPosition + (punchIntensity * 1); // Extension vers l'avant
+            rightArm.rotation.z = guardZ + (punchIntensity * 0.3); // Rotation du bras
             
+            // Bras gauche reste en garde mais recule légèrement
+            leftArm.rotation.x = guardPosition - (punchIntensity * 0.1);
+            leftArm.rotation.z = otherGuardZ + (punchIntensity * 0.1);
+        }
+        
         // Rotation du torse pour plus de puissance
-        const originalTorsoRotation = torso.rotation.y;
-        new TWEEN.Tween(torso.rotation)
-            .to({ y: isLeftPunch ? -0.4 : 0.4 }, 120)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .chain(
-                new TWEEN.Tween(torso.rotation)
-                    .to({ y: originalTorsoRotation }, 250)
-                    .easing(TWEEN.Easing.Back.Out)
-            )
-            .start();
-            
+        torso.rotation.y = (isLeftPunch ? -0.4 : 0.4) * punchIntensity;
+        
         // Mouvement de tête pour accompagner
-        const originalHeadRotation = head.rotation.y;
-        new TWEEN.Tween(head.rotation)
-            .to({ y: isLeftPunch ? -0.2 : 0.2 }, 120)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .chain(
-                new TWEEN.Tween(head.rotation)
-                    .to({ y: originalHeadRotation }, 250)
-                    .easing(TWEEN.Easing.Back.Out)
-            )
-            .start();
-    }
-    
-    // Animation de coup de pied avec mouvement des bras
-    animatePlayerKick(playerGroup, isLeftKick = true) {
-        if (!playerGroup.userData.animations) return;
-        
-        const { leftLeg, rightLeg, leftArm, rightArm, torso } = playerGroup.userData.animations;
-        const leg = isLeftKick ? leftLeg : rightLeg;
-        const oppositeArm = isLeftKick ? rightArm : leftArm; // Bras opposé pour l'équilibre
-        const sameArm = isLeftKick ? leftArm : rightArm;
-        
-        const originalLegRotation = leg.rotation.x;
-        const originalOppositeArmRotation = oppositeArm.rotation.x;
-        const originalSameArmRotation = sameArm.rotation.x;
-        const originalTorsoRotation = torso.rotation.y;
-        
-        // Animation de la jambe qui frappe
-        new TWEEN.Tween(leg.rotation)
-            .to({ x: Math.PI * 0.3 }, 200)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .chain(
-                new TWEEN.Tween(leg.rotation)
-                    .to({ x: -Math.PI * 0.2 }, 100)
-                    .easing(TWEEN.Easing.Quadratic.In)
-                    .chain(
-                        new TWEEN.Tween(leg.rotation)
-                            .to({ x: originalLegRotation }, 300)
-                            .easing(TWEEN.Easing.Back.Out)
-                    )
-            )
-            .start();
-            
-        // Bras opposé se lève pour l'équilibre (naturel lors d'un coup de pied)
-        new TWEEN.Tween(oppositeArm.rotation)
-            .to({ x: -Math.PI * 0.4, z: isLeftKick ? -0.3 : 0.3 }, 200)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .chain(
-                new TWEEN.Tween(oppositeArm.rotation)
-                    .to({ x: originalOppositeArmRotation, z: 0 }, 400)
-                    .easing(TWEEN.Easing.Back.Out)
-            )
-            .start();
-            
-        // Bras du même côté recule légèrement
-        new TWEEN.Tween(sameArm.rotation)
-            .to({ x: Math.PI * 0.1, z: isLeftKick ? 0.2 : -0.2 }, 200)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .chain(
-                new TWEEN.Tween(sameArm.rotation)
-                    .to({ x: originalSameArmRotation, z: 0 }, 400)
-                    .easing(TWEEN.Easing.Back.Out)
-            )
-            .start();
-            
-        // Rotation du torse pour plus de puissance
-        new TWEEN.Tween(torso.rotation)
-            .to({ y: isLeftKick ? 0.2 : -0.2 }, 150)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .chain(
-                new TWEEN.Tween(torso.rotation)
-                    .to({ y: originalTorsoRotation }, 350)
-                    .easing(TWEEN.Easing.Back.Out)
-            )
-            .start();
+        head.rotation.y = (isLeftPunch ? -0.2 : 0.2) * punchIntensity;
     }
     
     // Animation de célébration
     animatePlayerCelebration(playerGroup) {
         if (!playerGroup.userData.animations) return;
         
-        const { torso, head, leftArm, rightArm } = playerGroup.userData.animations;
+        const { torso, head, leftArm, rightArm, leftLeg, rightLeg } = playerGroup.userData.animations;
         
         // Les bras en l'air
         new TWEEN.Tween(leftArm.rotation)
@@ -1157,12 +1067,12 @@ class SoccerBoxGame {
                 forward: forwardPressed,
                 backward: backwardPressed,
                 left: leftPressed,
-                right: rightPressed
+                right: rightPressed,
+                shift: this.keys['ShiftLeft'] || this.keys['ShiftRight'],
             };
         }
 
         const punch = this.keys['Space'] || this.mouseState.clicked;
-        const kick = this.keys['KeyF'] || this.mouseState.rightClicked;
 
         // Envoyer les mouvements au serveur
         if (Object.values(movement).some(v => v)) {
@@ -1172,18 +1082,6 @@ class SoccerBoxGame {
         if (punch) {
             networkManager.sendPlayerPunch();
             this.animatePunch(this.localPlayerId);
-        }
-
-        if (kick) {
-            // Animation locale du coup de pied immédiate
-            const localPlayer = this.players.get(this.localPlayerId);
-            if (localPlayer) {
-                this.animatePlayerKick(localPlayer, Math.random() > 0.5);
-            }
-            // Envoyer coup de pied au serveur (si la fonction existe)
-            if (networkManager.sendPlayerKick) {
-                networkManager.sendPlayerKick();
-            }
         }
     }
 

@@ -6,7 +6,7 @@ class NetworkManager {
         this.playerTeam = null;
         this.lastMovementSent = 0;
         this.movementBuffer = null;
-        this.movementCooldown = 50; 
+        this.movementCooldown = 10;
         this.init();
     }
     init() {
@@ -40,7 +40,6 @@ class NetworkManager {
         this.socket.on('player-joined', (data) => {
             this.playerId = data.playerId;
             this.playerTeam = data.team;
-            console.log(`🎮 Joueur rejoint - ID: ${this.playerId}, Équipe: ${this.playerTeam}`);
             uiManager.clearConnectionTimeout();
             uiManager.hideConnectionStatus();
             game.setLocalPlayerId(this.playerId);
@@ -143,17 +142,9 @@ class NetworkManager {
         if (!this.connected || !this.playerId) return;
         this.socket.emit('player-punch');
     }
-    sendPlayerKick() {
+    sendPlayerShoot() {
         if (!this.connected || !this.playerId) return;
-        this.socket.emit('player-kick');
-    }
-    sendChatMessage(message) {
-        if (!this.connected) return;
-        this.socket.emit('chat-message', {
-            playerId: this.playerId,
-            message: message,
-            timestamp: Date.now()
-        });
+        this.socket.emit('player-shoot');
     }
     showActionEffect(position, emoji) {
         const canvas = document.createElement('canvas');
