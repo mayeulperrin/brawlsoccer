@@ -183,7 +183,7 @@ io.on('connection', (socket) => {
         if (!player || player.isKnockedOut) return;
 
         const { direction, rotation, running } = data;
-        const speed = running ? 10 : 4;
+        const speed = running ? 15 : 10;
         const factor = 0.6;
 
         if (running) {
