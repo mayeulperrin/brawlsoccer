@@ -9,7 +9,7 @@ class NetworkManager {
         // Buffers pour optimiser les envois
         this.lastMovementSent = 0;
         this.movementBuffer = null;
-        this.movementCooldown = 50; // Revenir à 50ms
+        this.movementCooldown = 10;
         
         this.init();
     }
@@ -57,8 +57,6 @@ class NetworkManager {
         this.socket.on('player-joined', (data) => {
             this.playerId = data.playerId;
             this.playerTeam = data.team;
-            
-            console.log(`🎮 Joueur rejoint - ID: ${this.playerId}, Équipe: ${this.playerTeam}`);
             
             // Annuler le timeout et cacher le statut de connexion
             uiManager.clearConnectionTimeout();
@@ -224,26 +222,13 @@ class NetworkManager {
     // Envoyer un coup de poing
     sendPlayerPunch() {
         if (!this.connected || !this.playerId) return;
-
         this.socket.emit('player-punch');
     }
 
     // Envoyer un coup de pied
-    sendPlayerKick() {
+    sendPlayerShoot() {
         if (!this.connected || !this.playerId) return;
-
-        this.socket.emit('player-kick');
-    }
-
-    // Envoyer un message de chat (future fonctionnalité)
-    sendChatMessage(message) {
-        if (!this.connected) return;
-
-        this.socket.emit('chat-message', {
-            playerId: this.playerId,
-            message: message,
-            timestamp: Date.now()
-        });
+        this.socket.emit('player-shoot');
     }
 
     // Effets visuels

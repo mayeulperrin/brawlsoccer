@@ -1,4 +1,33 @@
 // main.js - Point d'entrée principal du jeu
+
+// Variables globales
+let diagnostic, uiManager, networkManager, mobileControls, game, physicsManager;
+
+// Initialisation principale
+function initializeGame() {
+    try {
+        diagnostic.logStep('Initialisation des managers', 'loading');
+        
+        // Initialiser les managers
+        uiManager = new UIManager();
+        networkManager = new NetworkManager();
+        mobileControls = new MobileControls();
+        physicsManager = new PhysicsManager();
+        
+        // Initialiser le jeu principal
+        game = new SoccerBoxGame();
+        
+        diagnostic.logStep('Tous les managers initialisés', 'success');
+        
+        // Démarrer la boucle d'animation
+        animate();
+        
+    } catch (error) {
+        diagnostic.logError(error, 'Initialisation du jeu');
+        diagnostic.logStep('Échec de l\'initialisation', 'error', error.message);
+    }
+}
+
 class SoccerBoxApp {
     constructor() {
         this.initialized = false;
@@ -470,3 +499,6 @@ console.log(`
 🎮 SoccerBox - Jeu de Football-Boxe Multijoueur
 Tapez "debug.help()" pour les commandes de développement
 `);
+
+// Démarrer l'initialisation principale
+initializeGame();

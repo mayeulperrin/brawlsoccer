@@ -1171,11 +1171,7 @@ class SoccerBoxGame {
 
         if (punch) {
             networkManager.sendPlayerPunch();
-            // Animation locale du coup de poing
-            const localPlayer = this.players.get(this.localPlayerId);
-            if (localPlayer) {
-                this.animatePlayerPunch(localPlayer, Math.random() > 0.5);
-            }
+            this.animatePunch(this.localPlayerId);
         }
 
         if (kick) {
@@ -1238,8 +1234,6 @@ class SoccerBoxGame {
     animatePunch(playerId) {
         const playerGroup = this.players.get(playerId);
         if (!playerGroup) return;
-
-        console.log(`👊 Animation de coup de poing pour le joueur ${playerId}`);
 
         // Utiliser la nouvelle animation de coup de poing
         const isLeftPunch = Math.random() > 0.5; // Alternance aléatoire
