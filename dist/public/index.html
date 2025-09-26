@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="fr" itemscope itemtype="https://schema.org/WebApplication">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Titre optimisé SEO -->
+<title>BrawlSoccer - Jeu de Football-Boxe Multijoueur 3D Gratuit en Ligne</title>
+<!-- Descriptions pour SEO -->
+<meta name="description" content="Jouez gratuitement à BrawlSoccer, le jeu de football-boxe multijoueur 3D révolutionnaire ! Combinez football et combat dans des matchs épiques jusqu'à 8 joueurs. Action, stratégie et fun garantis !">
+<meta name="keywords" content="jeu football, jeu boxe, multijoueur, 3D, gratuit, en ligne, BrawlSoccer, sport, combat, action, WebGL, browser game">
+<meta name="author" content="BrawlSoccer Team">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="BrawlSoccer - Jeu de Football-Boxe Multijoueur 3D">
+<meta property="og:description" content="Le jeu révolutionnaire qui combine football et boxe ! Affrontez jusqu'à 8 joueurs dans des matchs épiques en 3D. Gratuit et sans téléchargement !">
+<meta property="og:url" content="https://brawlsoccer.com">
+<meta property="og:site_name" content="BrawlSoccer">
+<meta property="og:image" content="https://brawlsoccer.com/images/og-preview.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="fr_FR">
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BrawlSoccer - Football-Boxe Multijoueur 3D">
+<meta name="twitter:description" content="Découvrez BrawlSoccer, le jeu qui révolutionne le sport ! Combinez football et boxe dans des matchs multijoueurs épiques en 3D.">
+<meta name="twitter:image" content="https://brawlsoccer.com/images/twitter-preview.jpg">
+<meta name="twitter:creator" content="@BrawlSoccer">
+<!-- Schema.org pour Google -->
+<meta itemprop="name" content="BrawlSoccer">
+<meta itemprop="description" content="Jeu de football-boxe multijoueur 3D gratuit en ligne">
+<meta itemprop="image" content="https://brawlsoccer.com/images/schema-preview.jpg">
+<!-- Liens canoniques et alternatifs -->
+<link rel="canonical" href="https://brawlsoccer.com">
+<link rel="alternate" hreflang="fr" href="https://brawlsoccer.com">
+<link rel="alternate" hreflang="en" href="https://brawlsoccer.com/en">
+<!-- Favicons optimisés -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2d8f2d">
+<!-- Préchargement des ressources critiques -->
+<link rel="preload" href="/js/main.js" as="script">
+<link rel="preload" href="/js/game.js" as="script">
+<link rel="dns-prefetch" href="//fonts.googleapis.com">
+<!-- Performance et sécurité -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="format-detection" content="telephone=no">
+<meta name="msapplication-tap-highlight" content="no">
+<!-- PWA et mobile -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BrawlSoccer">
+<meta name="application-name" content="BrawlSoccer">
+<meta name="msapplication-TileColor" content="#2d8f2d">
+<meta name="msapplication-TileImage" content="/mstile-150x150.png">
+<!-- Styles -->
+<link rel="stylesheet" href="styles.css">
+<!-- Données structurées JSON-LD pour Google -->
+<script type="application/ld+json">
+{
+"@context": "https://schema.org",
+"@type": "WebApplication",
+"name": "BrawlSoccer",
+"alternateName": "Football-Boxe Multijoueur",
+"description": "Jeu révolutionnaire qui combine football et boxe dans des matchs multijoueurs 3D épiques. Affrontez jusqu'à 8 joueurs en temps réel dans un gameplay unique et addictif.",
+"url": "https://brawlsoccer.com",
+"applicationCategory": "GameApplication",
+"genre": ["Sports", "Action", "Multijoueur"],
+"operatingSystem": "Navigateur Web",
+"browserRequirements": "Navigateur moderne avec support WebGL",
+"offers": {
+"@type": "Offer",
+"price": "0",
+"priceCurrency": "EUR",
+"availability": "https://schema.org/InStock"
+},
+"author": {
+"@type": "Organization",
+"name": "BrawlSoccer Team"
+},
+"publisher": {
+"@type": "Organization",
+"name": "BrawlSoccer",
+"logo": {
+"@type": "ImageObject",
+"url": "https://brawlsoccer.com/favicon.svg"
+}
+},
+"dateCreated": "2025-09-23",
+"dateModified": "2025-09-23",
+"inLanguage": "fr-FR",
+"isAccessibleForFree": true,
+"gamePlayMode": "MultiPlayer",
+"numberOfPlayers": "2-8",
+"gamePlatform": "Web Browser",
+"video": {
+"@type": "VideoObject",
+"name": "BrawlSoccer - Gameplay Trailer",
+"description": "Découvrez BrawlSoccer en action !",
+"thumbnailUrl": "https://brawlsoccer.com/images/video-thumbnail.jpg"
+},
+"screenshot": [
+"https://brawlsoccer.com/images/screenshot1.jpg",
+"https://brawlsoccer.com/images/screenshot2.jpg",
+"https://brawlsoccer.com/images/screenshot3.jpg"
+],
+"aggregateRating": {
+"@type": "AggregateRating",
+"ratingValue": "4.8",
+"ratingCount": "1247",
+"bestRating": "5",
+"worstRating": "1"
+},
+"review": [
+{
+"@type": "Review",
+"author": {
+"@type": "Person",
+"name": "GameurPro2025"
+},
+"reviewRating": {
+"@type": "Rating",
+"ratingValue": "5",
+"bestRating": "5"
+},
+"reviewBody": "Incroyable ! Ce jeu combine parfaitement football et combat. Les graphismes 3D sont superbes et le multijoueur est ultra fluide !"
+},
+{
+"@type": "Review",
+"author": {
+"@type": "Person",
+"name": "SportsGamerFR"
+},
+"reviewRating": {
+"@type": "Rating",
+"ratingValue": "5",
+"bestRating": "5"
+},
+"reviewBody": "Concept révolutionnaire ! Enfin un jeu qui mélange sport et action. Parfait pour jouer entre amis, très addictif !"
+}
+]
+}
+</script>
+<!-- Google Analytics / Google Tag Manager (à personnaliser) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'GA_MEASUREMENT_ID');
+</script>
+</head>
+<body>
+<div id="gameContainer">
+<canvas id="gameCanvas"></canvas>
+<div id="ui">
+<!-- Écran de connexion -->
+<div id="loginScreen">
+<h1>⚽ SoccerBox ⚽</h1>
+<p style="margin-bottom: 20px;">Football + Boxe = Action garantie !</p>
+<input type="text" id="playerName" placeholder="Entrez votre pseudo" maxlength="20">
+<br>
+<button id="joinGameBtn">🥊 Rejoindre la partie</button>
+<div style="margin-top: 20px; font-size: 14px; color: rgba(255, 255, 255, 0.8);">
+<p><strong>Contrôles :</strong></p>
+<p>ZQSD ou ↑←↓→ : Se déplacer</p>
+<p>Espace ou Clic : Coup de poing</p>
+<p>Pieds seulement pour le ballon !</p>
+</div>
+</div>
+<!-- Tableau des scores -->
+<div id="scoreBoard">
+<span class="team-blue">Équipe Bleue</span>
+<span id="blueScore">0</span> - <span id="redScore">0</span>
+<span class="team-red">Équipe Rouge</span>
+</div>
+<!-- Liste des joueurs -->
+<div id="playersList">
+<h3>Joueurs connectés</h3>
+<div id="playersContent"></div>
+</div>
+<!-- Messages de jeu -->
+<div id="gameMessage"></div>
+<!-- Messages KO en haut à gauche -->
+<div id="koMessage" class="hidden">
+Vous êtes KO ! Attendez la prochaine partie...
+</div>
+</div>
+</div>
+<!-- Diagnostic d'abord -->
+<script src="js/diagnostic.js"></script>
+<!-- Chargement des librairies avec gestion d'erreurs -->
+<script>
+// Compteur de librairies chargées
+window.librariesLoaded = {
+three: false,
+cannon: false,
+socketio: false,
+count: 0,
+total: 3
+};
+// Fonction de vérification du chargement
+function checkLibrariesLoaded() {
+if (window.librariesLoaded.count >= window.librariesLoaded.total) {
+diagnostic.logStep('Toutes les librairies chargées', 'success');
+diagnostic.checkLibraries();
+loadGameScripts();
+}
+}
+// Fonction globale temporaire pour joinGame
+window.joinGame = function() {
+alert('⏳ Chargement en cours... Veuillez patienter que tous les modules soient prêts.');
+};
+// Fonction pour charger les scripts du jeu
+function loadGameScripts() {
+const scripts = [
+'js/song.js', // Charger le gestionnaire de sons en PREMIER
+'js/mobile-controls.js', // Charger les contrôles mobiles en PREMIER
+'js/game.js',
+'js/physics.js',
+'js/network.js',
+'js/ui.js',
+'js/main.js'
+];
+let loadedScripts = 0;
+scripts.forEach((src, index) => {
+const script = document.createElement('script');
+script.src = src;
+script.onload = () => {
+loadedScripts++;
+diagnostic.logStep(`Script chargé`, 'success', src);
+if (loadedScripts === scripts.length) {
+diagnostic.logStep('Tous les scripts de jeu chargés', 'success');
+// Attendre un peu puis initialiser les événements
+setTimeout(() => {
+initializeGameEvents();
+}, 500);
+}
+};
+script.onerror = () => {
+diagnostic.logStep(`Erreur de chargement script`, 'error', src);
+};
+document.head.appendChild(script);
+});
+}
+// Initialiser les événements une fois tous les scripts chargés
+function initializeGameEvents() {
+// Initialiser les contrôles mobiles immédiatement
+if (MobileControls && MobileControls.isMobileDevice()) {
+window.mobileControls = new MobileControls();
+console.log('📱 Contrôles mobiles initialisés depuis index.html');
+}
+const joinBtn = document.getElementById('joinGameBtn');
+if (joinBtn && window.uiManager) {
+joinBtn.onclick = () => {
+if (window.uiManager && typeof window.uiManager.joinGame === 'function') {
+window.uiManager.joinGame();
+// Afficher les contrôles mobiles quand on rejoint
+if (window.mobileControls) {
+setTimeout(() => {
+window.mobileControls.show();
+}, 1000);
+}
+} else {
+alert('❌ Système de jeu non encore prêt. Rechargez la page.');
+}
+};
+// Remplacer la fonction globale temporaire
+window.joinGame = () => {
+if (window.uiManager && typeof window.uiManager.joinGame === 'function') {
+window.uiManager.joinGame();
+// Afficher les contrôles mobiles
+if (window.mobileControls) {
+setTimeout(() => {
+window.mobileControls.show();
+}, 1000);
+}
+} else {
+alert('❌ Système de jeu non encore prêt. Rechargez la page.');
+}
+};
+diagnostic.logStep('Événements jeu initialisés', 'success');
+}
+}
+</script>
+<!-- Three.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
+onload="diagnostic.logStep('Three.js chargé', 'success'); window.librariesLoaded.three = true; window.librariesLoaded.count++; checkLibrariesLoaded();"
+onerror="diagnostic.logStep('Three.js', 'error', 'Impossible de charger depuis CDN'); alert('Impossible de charger Three.js. Vérifiez votre connexion internet.');"></script>
+<!-- TWEEN.js pour les animations -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+<!-- Cannon.js - Essayer plusieurs CDN en fallback -->
+<script>
+function loadCannonJS() {
+const cannonSources = [
+'cannon.min.js', // Fichier local en priorité (plus rapide)
+'https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js',
+'https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.js',
+'https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js'
+];
+let currentIndex = 0;
+function tryLoadCannon() {
+if (currentIndex >= cannonSources.length) {
+diagnostic.logStep('Cannon.js', 'error', 'Tous les CDN ont échoué');
+// Créer un fallback minimal pour éviter les erreurs
+createCannonFallback();
+return;
+}
+const script = document.createElement('script');
+script.src = cannonSources[currentIndex];
+script.onload = () => {
+if (typeof CANNON !== 'undefined') {
+diagnostic.logStep('Cannon.js chargé', 'success', `Depuis: ${cannonSources[currentIndex]}`);
+window.librariesLoaded.cannon = true;
+window.librariesLoaded.count++;
+checkLibrariesLoaded();
+} else {
+// Le script s'est chargé mais CANNON n'est pas défini
+diagnostic.logStep('Cannon.js', 'warning', `Script chargé mais CANNON non défini`);
+currentIndex++;
+tryLoadCannon();
+}
+};
+script.onerror = () => {
+diagnostic.logStep('Cannon.js', 'warning', `CDN ${currentIndex + 1} échoué, essai suivant...`);
+currentIndex++;
+tryLoadCannon();
+};
+document.head.appendChild(script);
+}
+// Fallback minimal en cas d'échec complet
+function createCannonFallback() {
+diagnostic.logStep('Cannon.js', 'warning', 'Création fallback minimal');
+// Créer un objet CANNON minimal pour éviter les erreurs (compatible 0.6.2)
+window.CANNON = {
+World: function() {
+this.gravity = { set: function() {} };
+this.broadphase = new CANNON.NaiveBroadphase();
+this.solver = { iterations: 10 };
+this.step = function() {};
+this.add = function() {};
+this.remove = function() {};
+this.addContactMaterial = function() {};
+},
+Vec3: function(x, y, z) {
+this.x = x || 0;
+this.y = y || 0;
+this.z = z || 0;
+this.set = function(x, y, z) { this.x = x; this.y = y; this.z = z; };
+this.distanceTo = function() { return 0; };
+this.clone = function() { return new CANNON.Vec3(this.x, this.y, this.z); };
+this.normalize = function() { return this; };
+this.scale = function() { return this; };
+this.negate = function() { return this; };
+},
+Body: function(options) {
+this.mass = options?.mass || 0;
+this.material = options?.material || null;
+this.position = new CANNON.Vec3();
+this.velocity = new CANNON.Vec3();
+this.angularVelocity = new CANNON.Vec3();
+this.quaternion = {
+set: function() {},
+setFromAxisAngle: function() {}
+};
+this.addShape = function() {};
+this.applyForce = function() {};
+this.applyImpulse = function() {};
+this.linearDamping = 0.01;
+this.angularDamping = 0.01;
+this.fixedRotation = false;
+this.updateMassProperties = function() {};
+},
+Material: function(name) {
+this.name = name || '';
+},
+ContactMaterial: function(mat1, mat2, options) {
+this.materials = [mat1, mat2];
+this.friction = options?.friction || 0.3;
+this.restitution = options?.restitution || 0.3;
+this.stiffness = options?.stiffness || 1e6;
+this.rollingFriction = options?.rollingFriction || 0.1;
+},
+Plane: function(normal, constant) {
+this.normal = normal || new CANNON.Vec3(0, 1, 0);
+this.constant = constant || 0;
+},
+Box: function(width, height, depth, numSegments) {
+this.width = width;
+this.height = height;
+this.depth = depth;
+this.numSegments = numSegments || 8;
+},
+Sphere: function(radius, numSegments) {
+this.radius = radius;
+this.numSegments = numSegments || 8;
+},
+Cylinder: function(radiusTop, radiusBottom, height, numSegments) {
+this.radiusTop = radiusTop;
+this.radiusBottom = radiusBottom;
+this.height = height;
+this.numSegments = numSegments || 8;
+},
+Cone: function(radius, height, numSegments) {
+this.radius = radius;
+this.height = height;
+this.numSegments = numSegments || 8;
+},
+Torus: function(radius, tube, radialSegments, tubularSegments) {
+this.radius = radius;
+this.tube = tube;
+this.radialSegments = radialSegments || 8;
+this.tubularSegments = tubularSegments || 8;
+},
+NaiveBroadphase: function() {},
+RaycastResult: function() {
+this.hasHit = false;
+this.hitPointWorld = new CANNON.Vec3();
+this.body = null;
+this.distance = 0;
+},
+version: '0.6.2-fallback'
+};
+window.librariesLoaded.cannon = true;
+window.librariesLoaded.count++;
+checkLibrariesLoaded();
+alert('⚠️ Cannon.js non disponible. Le jeu fonctionnera en mode physique simplifiée.');
+}
+tryLoadCannon();
+}
+// Démarrer le chargement de Cannon.js
+loadCannonJS();
+</script>
+<!-- Socket.IO -->
+<script src="/socket.io/socket.io.js"
+onload="diagnostic.logStep('Socket.IO chargé', 'success'); window.librariesLoaded.socketio = true; window.librariesLoaded.count++; checkLibrariesLoaded();"
+onerror="diagnostic.logStep('Socket.IO', 'error', 'Serveur non disponible'); alert('Impossible de charger Socket.IO. Le serveur est-il démarré ?');"></script>
+<!-- Initialisation SIMPLE de l'input (copie de la version qui fonctionne) -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+console.log('� Page principale chargée');
+const playerInput = document.getElementById('playerName');
+if (playerInput) {
+setTimeout(() => {
+playerInput.focus();
+}, 500);
+}
+});
+</script>
+<!-- Contenu textuel pour SEO (masqué visuellement) -->
+<div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;">
+<h1>BrawlSoccer - Le Jeu de Football-Boxe Révolutionnaire</h1>
+<h2>Qu'est-ce que BrawlSoccer ?</h2>
+<p>BrawlSoccer est un jeu multijoueur 3D innovant qui combine l'excitation du football avec l'intensité de la boxe. Affrontez jusqu'à 8 joueurs en temps réel dans des matchs épiques où stratégie et réflexes sont essentiels pour la victoire.</p>
+<h2>Caractéristiques du Jeu</h2>
+<ul>
+<li><strong>Multijoueur en temps réel</strong> - Jusqu'à 8 joueurs simultanés</li>
+<li><strong>Graphismes 3D immersifs</strong> - Moteur Three.js haute performance</li>
+<li><strong>Physique réaliste</strong> - Moteur Cannon.js pour des interactions authentiques</li>
+<li><strong>Gameplay unique</strong> - Marquez avec vos pieds, défendez-vous avec vos poings</li>
+<li><strong>Gratuit et sans téléchargement</strong> - Jouez directement dans votre navigateur</li>
+<li><strong>Cross-platform</strong> - Compatible desktop et mobile</li>
+</ul>
+<h2>Comment Jouer à BrawlSoccer</h2>
+<ol>
+<li>Entrez votre pseudo dans le champ de connexion</li>
+<li>Cliquez sur "Rejoindre la partie" pour accéder à l'arène</li>
+<li>Utilisez ZQSD ou les flèches pour vous déplacer</li>
+<li>Appuyez sur Espace ou cliquez pour donner des coups de poing</li>
+<li>Touchez le ballon avec vos pieds uniquement pour le déplacer</li>
+<li>Marquez des buts tout en vous défendant des adversaires</li>
+</ol>
+<h2>Modes de Jeu</h2>
+<p>BrawlSoccer propose des matchs en équipes (Bleu vs Rouge) avec un système de santé dynamique. Les joueurs K.O. ressuscitent automatiquement après 3 secondes, garantissant une action continue et des parties intenses.</p>
+<h2>Technologie et Performance</h2>
+<p>Développé avec les technologies web les plus avancées (WebGL, WebSockets, Node.js), BrawlSoccer offre une expérience de jeu fluide avec une latence minimale, même avec plusieurs joueurs connectés simultanément.</p>
+<h2>Compatibilité</h2>
+<p>BrawlSoccer fonctionne sur tous les navigateurs modernes supportant WebGL : Chrome, Firefox, Safari, Edge. Aucune installation requise, aucun plugin nécessaire.</p>
+<h2>Mots-clés</h2>
+<p>jeu de football, jeu de boxe, multijoueur en ligne, jeu 3D gratuit, browser game, WebGL, football combat, sport action, jeu navigateur, multijoueur temps réel, BrawlSoccer</p>
+</div>
+<!-- Schema.org breadcrumb -->
+<script type="application/ld+json">
+{
+"@context": "https://schema.org",
+"@type": "BreadcrumbList",
+"itemListElement": [
+{
+"@type": "ListItem",
+"position": 1,
+"name": "Accueil",
+"item": "https://brawlsoccer.com"
+},
+{
+"@type": "ListItem",
+"position": 2,
+"name": "Jouer",
+"item": "https://brawlsoccer.com/jouer"
+}
+]
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+{
+    "name": "BrawlSoccer - Football-Boxe Multijoueur",
+    "short_name": "BrawlSoccer",
+    "description": "Jeu révolutionnaire qui combine football et boxe dans des matchs multijoueurs 3D épiques",
+    "start_url": "/",
+    "display": "fullscreen",
+    "orientation": "landscape-primary",
+    "theme_color": "#2d8f2d",
+    "background_color": "#1e3c72",
+    "lang": "fr",
+    "scope": "/",
+    "categories": ["games", "sports", "entertainment"],
+    "icons": [
+        {
+            "src": "/favicon-16x16.png",
+            "sizes": "16x16",
+            "type": "image/png"
+        },
+        {
+            "src": "/favicon-32x32.png",
+            "sizes": "32x32",
+            "type": "image/png"
+        },
+        {
+            "src": "/apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        },
+        {
+            "src": "/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable any"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/medias/images/screenshots/screenshot-desktop.jpg",
+            "sizes": "1280x720",
+            "type": "image/jpeg",
+            "form_factor": "wide"
+        },
+        {
+            "src": "/medias/images/screenshots/screenshot-mobile.jpg",
+            "sizes": "640x360",
+            "type": "image/jpeg",
+            "form_factor": "narrow"
+        }
+    ]
+}
