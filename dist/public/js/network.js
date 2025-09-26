@@ -78,9 +78,9 @@ class NetworkManager {
             if (knockout) {
                 const targetName = game.getPlayerNameById(targetId);
                 game.showKOMessage(`💀 ${targetName} est K.O. !`, 2000);
-                this.playRandomSoundFallback('ko', 0.8);
+                soundManager.playKOSound();
             }
-            this.playRandomSoundFallback('kick', 0.6);
+            soundManager.playKickSound();
         });
         this.socket.on('player-respawn', (data) => {
             const { playerId, health } = data;
@@ -95,7 +95,7 @@ class NetworkManager {
             uiManager.updateScore(score);
             game.showGameMessage(`⚽ BUT ! ${teamName} marque !`, 3000);
             this.showGoalEffect(team);
-            this.playRandomSoundFallback('goal', 0.7);
+            soundManager.playGoalSound();
         });
         this.socket.on('game-end', (data) => {
             const { winner, finalScore } = data;
@@ -255,24 +255,6 @@ class NetworkManager {
             }
         };
         animateParticles();
-    }
-    async playRandomSoundFallback(folder, volume = 0.5) {
-        if (!this.audioCache) this.audioCache = {};
-        const cacheKey = `${folder}_${volume}`;
-        if (this.audioCache[cacheKey]) {
-            this.audioCache[cacheKey].currentTime = 0;
-            this.audioCache[cacheKey].play().catch(() => {});
-            return;
-        }
-        const commonNames = ['1.mp3', '2.mp3', '3.mp3'];
-        const randomFile = commonNames[Math.floor(Math.random() * commonNames.length)];
-        try {
-            const audio = new Audio(`medias/${folder}/${randomFile}`);
-            audio.volume = volume;
-            this.audioCache[cacheKey] = audio;
-            audio.play().catch(() => {});
-        } catch (error) {
-        }
     }
     processMovementBuffer() {
         if (this.movementBuffer) {

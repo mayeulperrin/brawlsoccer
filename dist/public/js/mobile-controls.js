@@ -11,7 +11,7 @@ class MobileControls {
             right: false
         };
         this.actions = {
-            shoot: false,
+            shoot: false
         };
         this.joystick = {
             container: null,
@@ -123,7 +123,7 @@ class MobileControls {
         joystickStick.id = 'mobile-joystick-stick';
         joystickStick.style.cssText = `
             position: absolute !important;
-            bottom: 50% !important;
+            top: 50% !important;
             left: 50% !important;
             width: 40px !important;
             height: 40px !important;
@@ -220,7 +220,6 @@ class MobileControls {
     }
     updateMovementFromJoystick(x, y) {
         const threshold = 10;
-        const oldMovement = { ...this.movement };
         this.movement.forward = false;
         this.movement.backward = false;
         this.movement.left = false;
@@ -243,7 +242,6 @@ class MobileControls {
             left: false,
             right: false
         };
-        console.log('📱 Mouvement arrêté');
         this.sendMovementToGame();
     }
     setupButtonEvents() {
@@ -313,19 +311,14 @@ class MobileControls {
             }
             return;
         }
-        const keyMap = {
-            shoot: 'Space',
-        };
-        const keyCode = keyMap[action];
-        if (keyCode) {
-            const event = new KeyboardEvent(pressed ? 'keydown' : 'keyup', {
-                code: keyCode,
-                key: keyCode === 'Space' ? ' ' : 'Shift',
-                bubbles: true,
-                cancelable: true
-            });
-            document.dispatchEvent(event);
-        }
+        const keyCode = 'Space';
+        const event = new KeyboardEvent(pressed ? 'keydown' : 'keyup', {
+            code: keyCode,
+            key: ' ',
+            bubbles: true,
+            cancelable: true
+        });
+        document.dispatchEvent(event);
     }
     showControls() {
         if (this.mobileControlsContainer && !this.isVisible) {

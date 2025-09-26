@@ -81,6 +81,17 @@ try {
     // Copier le serveur
     console.log('  - server.js');
     fs.copyFileSync('server.js', path.join(buildDir, 'server.js'));
+
+
+    // Créer le dossier public dans dist
+    fs.mkdirSync(path.join(buildDir, 'public'));
+
+    // Copier les styles CSS
+    console.log('  - styles.css (optimisé)');
+    const cssContent = fs.readFileSync(path.join(sourceDir, 'styles.css'), 'utf8');
+    const optimizedCSS = minifyCSS(cssContent);
+    const cssOutputPath = path.join(buildDir, 'public', 'styles.css');
+    fs.writeFileSync(cssOutputPath, optimizedCSS);
     
     // Copier package.json
     console.log('  - package.json');
@@ -93,9 +104,6 @@ try {
         path.join(buildDir, 'package.json'), 
         JSON.stringify(packageJson, null, 2)
     );
-
-    // Créer le dossier public dans dist
-    fs.mkdirSync(path.join(buildDir, 'public'));
 
     // Traiter index.html
     console.log('  - index.html (optimisé)');

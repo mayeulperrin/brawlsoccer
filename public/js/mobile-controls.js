@@ -15,7 +15,7 @@ class MobileControls {
         };
         
         this.actions = {
-            shoot: false,
+            shoot: false
         };
         
         // Joystick virtuel
@@ -36,7 +36,6 @@ class MobileControls {
         console.log('📱 MobileControls créé, mobile détecté:', this.isMobile);
         
         if (this.isMobile) {
-            // Initialiser immédiatement
             this.init();
         }
     }
@@ -166,7 +165,7 @@ class MobileControls {
         joystickStick.id = 'mobile-joystick-stick';
         joystickStick.style.cssText = `
             position: absolute !important;
-            bottom: 50% !important;
+            top: 50% !important;
             left: 50% !important;
             width: 40px !important;
             height: 40px !important;
@@ -189,7 +188,7 @@ class MobileControls {
     }
 
     createActionButtons() {
-        // Bouton de frappe/tir
+        // Bouton de frappe/tir repositionné plus bas
         const shootButton = document.createElement('div');
         shootButton.id = 'mobile-shoot-btn';
         shootButton.innerHTML = '🥊';
@@ -214,8 +213,8 @@ class MobileControls {
             -webkit-tap-highlight-color: transparent !important;
             backdrop-filter: blur(5px) !important;
         `;
-        this.mobileControlsContainer.appendChild(shootButton);
         
+        this.mobileControlsContainer.appendChild(shootButton);
         this.actionButtons.set('shoot', shootButton);
         
         // Events des boutons
@@ -297,7 +296,6 @@ class MobileControls {
         const threshold = 10;
         
         // Reset mouvement
-        const oldMovement = { ...this.movement };
         this.movement.forward = false;
         this.movement.backward = false;
         this.movement.left = false;
@@ -330,12 +328,11 @@ class MobileControls {
             right: false
         };
         
-        console.log('📱 Mouvement arrêté');
         this.sendMovementToGame();
     }
 
     setupButtonEvents() {
-        // Bouton de frappe
+        // Bouton de frappe seulement
         const shootButton = this.actionButtons.get('shoot');
         if (shootButton) {
             shootButton.addEventListener('touchstart', (e) => {
@@ -419,20 +416,14 @@ class MobileControls {
         }
         
         // Simuler événement clavier pour les actions
-        const keyMap = {
-            shoot: 'Space',
-        };
-        
-        const keyCode = keyMap[action];
-        if (keyCode) {
-            const event = new KeyboardEvent(pressed ? 'keydown' : 'keyup', {
-                code: keyCode,
-                key: keyCode === 'Space' ? ' ' : 'Shift',
-                bubbles: true,
-                cancelable: true
-            });
-            document.dispatchEvent(event);
-        }
+        const keyCode = 'Space';
+        const event = new KeyboardEvent(pressed ? 'keydown' : 'keyup', {
+            code: keyCode,
+            key: ' ',
+            bubbles: true,
+            cancelable: true
+        });
+        document.dispatchEvent(event);
     }
 
     showControls() {

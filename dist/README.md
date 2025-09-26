@@ -51,4 +51,4 @@ Le serveur démarre sur le port 3000 par défaut.
 Pour changer le port, modifier la variable dans server.js.
 
 ---
-Généré le 25/09/2025
+Généré le 26/09/2025
