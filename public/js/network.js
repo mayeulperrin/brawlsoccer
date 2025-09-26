@@ -9,7 +9,7 @@ class NetworkManager {
         // Buffers pour optimiser les envois
         this.lastMovementSent = 0;
         this.movementBuffer = null;
-        this.movementCooldown = 10;
+        this.movementCooldown = 100;
         
         this.init();
     }
