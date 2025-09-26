@@ -81,6 +81,12 @@ try {
     // Copier le serveur
     console.log('  - server.js');
     fs.copyFileSync('server.js', path.join(buildDir, 'server.js'));
+
+    // Copier les styles CSS
+    console.log('  - styles.css (optimisé)');
+    const cssContent = fs.readFileSync(path.join(sourceDir, 'styles.css'), 'utf8');
+    const optimizedCSS = minifyCSS(cssContent);
+    fs.writeFileSync(path.join(buildDir, 'styles.css'), optimizedCSS);
     
     // Copier package.json
     console.log('  - package.json');
