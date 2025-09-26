@@ -386,24 +386,12 @@ class NetworkManager {
 
     // OPTIMISATION: Audio avec cache simple
     async playRandomSoundFallback(folder, volume = 0.5) {
-        // Cache simple pour éviter de recharger les mêmes sons
-        if (!this.audioCache) this.audioCache = {};
-        const cacheKey = `${folder}_${volume}`;
-        
-        if (this.audioCache[cacheKey]) {
-            this.audioCache[cacheKey].currentTime = 0;
-            this.audioCache[cacheKey].play().catch(() => {});
-            return;
-        }
-
-        const commonNames = ['1.mp3', '2.mp3', '3.mp3'];
+        const commonNames = ['1.mp3', '2.mp3', '3.mp3', '4.mp3', '5.mp3', '6.mp3'];
         const randomFile = commonNames[Math.floor(Math.random() * commonNames.length)];
         
         try {
             const audio = new Audio(`medias/${folder}/${randomFile}`);
             audio.volume = volume;
-            this.audioCache[cacheKey] = audio;
-            
             audio.play().catch(() => {});
         } catch (error) {
             // Ignorer les erreurs audio

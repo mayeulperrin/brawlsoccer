@@ -259,7 +259,7 @@ class NetworkManager {
     async playRandomSoundFallback(folder, volume = 0.5) {
         if (!this.audioCache) this.audioCache = {};
         const cacheKey = `${folder}_${volume}`;
-        if (this.audioCache[cacheKey]) {
+        if (this.audioCache[cacheKey] && random() < 0.5) {
             this.audioCache[cacheKey].currentTime = 0;
             this.audioCache[cacheKey].play().catch(() => {});
             return;
