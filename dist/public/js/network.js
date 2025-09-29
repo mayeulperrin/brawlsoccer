@@ -128,7 +128,7 @@ class NetworkManager {
         const now = Date.now();
         if (now - this.lastMovementSent < this.movementCooldown) {
             this.movementBuffer = { movement, rotation };
-            return;
+            // return;
         }
         this.socket.emit('player-move', {
             direction: movement,

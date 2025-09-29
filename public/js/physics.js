@@ -89,15 +89,15 @@ class PhysicsManager {
         );
         this.world.addContactMaterial(playerBallContact);
         
-        // Joueur-Joueur : collisions élastiques
+        // Joueur-Joueur : collisions très élastiques pour bien se repousser
         const playerPlayerContact = new CANNON.ContactMaterial(
             this.playerMaterial, 
             this.playerMaterial, 
             {
-                friction: 0.2,
-                restitution: 0.4,
-                contactEquationStiffness: 1e8,
-                contactEquationRelaxation: 3
+            friction: 0.1, // Faible friction pour glisser l'un contre l'autre
+            restitution: 1.0, // Rebond maximal pour bien se repousser
+            contactEquationStiffness: 1e9, // Stiffness très élevée pour éviter l'enfoncement
+            contactEquationRelaxation: 2
             }
         );
         this.world.addContactMaterial(playerPlayerContact);
@@ -193,8 +193,8 @@ class PhysicsManager {
         playerBody.updateMassProperties();
         
         // AUCUN amortissement - vitesse MAXIMALE
-        playerBody.linearDamping = 0.0; // ZÉRO résistance !
-        playerBody.angularDamping = 0.0; // ZÉRO résistance !
+        playerBody.linearDamping = 1; // ZÉRO résistance !
+        playerBody.angularDamping = 1; // ZÉRO résistance !
         
         this.world.add(playerBody);
         this.playerBodies.set(playerId, playerBody);

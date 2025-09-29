@@ -35,6 +35,7 @@ class SoccerBoxGame {
         this.createScene();
         this.createLights();
         this.createTerrain();
+        // this.createFieldBorders();
         this.createGoals();
         this.createBall();
         this.setupEventListeners();
@@ -119,46 +120,44 @@ class SoccerBoxGame {
 
         // Lignes du terrain
         this.createFieldLines();
-
-        // PAS de bordures - terrain ouvert pour plus de liberté
     }
 
-    createFieldLines() {
+        createFieldLines() {
         const lineMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
         const lineWidth = 0.2;
         const lineHeight = 0.01;
-
+    
         // Ligne de centre (adaptée au terrain agrandi)
         const centerLineGeometry = new THREE.PlaneGeometry(80, lineWidth);
         const centerLine = new THREE.Mesh(centerLineGeometry, lineMaterial);
         centerLine.rotation.x = -Math.PI / 2;
         centerLine.position.y = lineHeight;
         this.scene.add(centerLine);
-
+    
         // Cercle central (agrandi aussi)
         const circleGeometry = new THREE.RingGeometry(6.9, 7.1, 32);
         const circle = new THREE.Mesh(circleGeometry, lineMaterial);
         circle.rotation.x = -Math.PI / 2;
         circle.position.y = lineHeight;
         this.scene.add(circle);
-
-        // Lignes de but (plus éloignées)
-        [-20, 20].forEach(z => {
+    
+        // Lignes de but (alignées avec les nouveaux buts)
+        [-19, 19].forEach(z => {
             const goalLineGeometry = new THREE.PlaneGeometry(30, lineWidth);
             const goalLine = new THREE.Mesh(goalLineGeometry, lineMaterial);
             goalLine.rotation.x = -Math.PI / 2;
             goalLine.position.set(0, lineHeight, z);
             this.scene.add(goalLine);
         });
-
-        // Surfaces de réparation (vraiment adaptées au terrain agrandi 80x50)
-        [-20, 20].forEach(z => {
+    
+        // Surfaces de réparation (ajustées)
+        [-19, 19].forEach(z => {
             const penaltyAreaGeometry = new THREE.EdgesGeometry(
-                new THREE.BoxGeometry(30, 0, 12) // Plus large (30) et plus profonde (12)
+                new THREE.BoxGeometry(30, 0, 12)
             );
             const penaltyAreaMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
             const penaltyArea = new THREE.LineSegments(penaltyAreaGeometry, penaltyAreaMaterial);
-            penaltyArea.position.set(0, lineHeight, z > 0 ? 19 : -19); // Plus près des buts
+            penaltyArea.position.set(0, lineHeight, z > 0 ? 18 : -18);
             this.scene.add(penaltyArea);
         });
     }
@@ -166,32 +165,32 @@ class SoccerBoxGame {
     createFieldBorders() {
         const borderMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
         
-        // Bordures latérales
-        const sideGeometry = new THREE.BoxGeometry(50, 2, 1);
+        // Bordures latérales (adaptées à la largeur du terrain : 80)
+        const sideGeometry = new THREE.BoxGeometry(80, 2, 1);
         const topBorder = new THREE.Mesh(sideGeometry, borderMaterial);
-        topBorder.position.set(0, 1, 15.5);
+        topBorder.position.set(0, 1, 25.5); // 50/2 + 0.5 pour la bordure
         topBorder.castShadow = true;
         this.scene.add(topBorder);
 
         const bottomBorder = new THREE.Mesh(sideGeometry, borderMaterial);
-        bottomBorder.position.set(0, 1, -15.5);
+        bottomBorder.position.set(0, 1, -25.5); // -50/2 - 0.5 pour la bordure
         bottomBorder.castShadow = true;
         this.scene.add(bottomBorder);
 
-        // Bordures des extrémités (mais pas devant les buts)
-        const endGeometry = new THREE.BoxGeometry(1, 2, 30);
+        // Bordures des extrémités (adaptées à la hauteur du terrain : 50)
+        const endGeometry = new THREE.BoxGeometry(1, 2, 50);
         const leftBorder = new THREE.Mesh(endGeometry, borderMaterial);
-        leftBorder.position.set(-25.5, 1, 0);
+        leftBorder.position.set(-40.5, 1, 0); // 80/2 + 0.5 pour la bordure
         leftBorder.castShadow = true;
         this.scene.add(leftBorder);
 
         const rightBorder = new THREE.Mesh(endGeometry, borderMaterial);
-        rightBorder.position.set(25.5, 1, 0);
+        rightBorder.position.set(40.5, 1, 0); // 80/2 + 0.5 pour la bordure
         rightBorder.castShadow = true;
         this.scene.add(rightBorder);
     }
 
-    createGoals() {
+        createGoals() {
         const goalMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
         const netMaterial = new THREE.MeshBasicMaterial({ 
             color: 0x888888, 
@@ -199,28 +198,28 @@ class SoccerBoxGame {
             transparent: true,
             opacity: 0.7
         });
-
-        // Positions des buts (adaptées au terrain agrandi)
+    
+        // Positions des buts (plus proches des bordures)
         const goalPositions = [
-            { z: -25, team: 'blue' },
-            { z: 25, team: 'red' }
+            { z: -24, team: 'blue' },   // But bleu plus proche du centre
+            { z: 24, team: 'red' }      // But rouge plus proche du centre
         ];
-
+    
         goalPositions.forEach(goal => {
             const goalGroup = new THREE.Group();
-
+    
             // Poteaux
             const postGeometry = new THREE.CylinderGeometry(0.2, 0.2, 4);
             const leftPost = new THREE.Mesh(postGeometry, goalMaterial);
             leftPost.position.set(-3, 2, goal.z);
             leftPost.castShadow = true;
             goalGroup.add(leftPost);
-
+    
             const rightPost = new THREE.Mesh(postGeometry, goalMaterial);
             rightPost.position.set(3, 2, goal.z);
             rightPost.castShadow = true;
             goalGroup.add(rightPost);
-
+    
             // Barre transversale
             const crossbarGeometry = new THREE.CylinderGeometry(0.2, 0.2, 6);
             const crossbar = new THREE.Mesh(crossbarGeometry, goalMaterial);
@@ -228,19 +227,30 @@ class SoccerBoxGame {
             crossbar.position.set(0, 4, goal.z);
             crossbar.castShadow = true;
             goalGroup.add(crossbar);
-
+    
             // Filet
             const netGeometry = new THREE.BoxGeometry(6, 4, 2);
             const net = new THREE.Mesh(netGeometry, netMaterial);
             net.position.set(0, 2, goal.z + (goal.z > 0 ? 1 : -1));
             goalGroup.add(net);
-
+    
+            // MURS INVISIBLES pour empêcher l'entrée dans les buts
+            const goalBlockerMaterial = new THREE.MeshBasicMaterial({ 
+                visible: false // Invisible mais collision active
+            });
+            
+            // Bloquer l'entrée du but (devant les poteaux)
+            const goalBlockerGeometry = new THREE.BoxGeometry(6, 4, 0.5);
+            const goalBlocker = new THREE.Mesh(goalBlockerGeometry, goalBlockerMaterial);
+            goalBlocker.position.set(0, 2, goal.z);
+            goalGroup.add(goalBlocker);
+    
             this.goals.push({
                 team: goal.team,
                 position: goal.z,
                 mesh: goalGroup
             });
-
+    
             this.scene.add(goalGroup);
         });
     }
@@ -1008,10 +1018,10 @@ class SoccerBoxGame {
             }
             
             // Ne pas capturer si l'écran de login est visible (vérifie la classe hidden)
-            const loginScreen = document.getElementById('loginScreen');
-            if (loginScreen && !loginScreen.classList.contains('hidden')) {
-                return;
-            }
+            // const loginScreen = document.getElementById('loginScreen');
+            // if (loginScreen && !loginScreen.classList.contains('hidden')) {
+            //     return;
+            // }
             
             this.keys[e.code] = false;
             e.preventDefault();
