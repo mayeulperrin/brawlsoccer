@@ -52,7 +52,8 @@ const gameState = {
     ball: {
         position: { x: 0, y: 0.5, z: 0 },
         velocity: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0 }
+        rotation: { x: 0, y: 0, z: 0 },
+        spin: { x: 0, y: 0, z: 0 }
     },
     score: {
         blue: 0,
@@ -62,6 +63,46 @@ const gameState = {
     gameTime: 0,
     maxPlayers: 8
 };
+
+const FIELD_HALF_WIDTH = 40;
+const FIELD_HALF_LENGTH = 25;
+const BALL_RADIUS = 0.5;
+const GRAVITY = -22; // Conserve un ballon ras du sol tout en gardant un arc crédible
+const BALL_PHYSICS = Object.freeze({
+    MASS: 0.43,
+    DRAG: 0.2,
+    MAGNUS: 0.035,
+    SPIN_DECAY: 1.45,
+    BOUNCE: 0.42,
+    GROUND_FRICTION: 7.4,
+    ROLL_DRAG: 0.45,
+    MAX_SPEED: 42,
+    MAX_VERTICAL_SPEED: 12,
+    MAX_SPIN: 65
+});
+
+function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+}
+
+function limitPlanarVelocity(velocity, maxMagnitude) {
+    const planarSpeed = Math.hypot(velocity.x, velocity.z);
+    if (planarSpeed > maxMagnitude) {
+        const scale = maxMagnitude / planarSpeed;
+        velocity.x *= scale;
+        velocity.z *= scale;
+    }
+}
+
+function limitVector(vector, maxMagnitude) {
+    const magnitude = Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
+    if (magnitude > maxMagnitude) {
+        const scale = maxMagnitude / magnitude;
+        vector.x *= scale;
+        vector.y *= scale;
+        vector.z *= scale;
+    }
+}
 
 // Classes pour les entités du jeu
 class Player {
@@ -281,6 +322,7 @@ function startGame() {
     // Réinitialiser le ballon
     gameState.ball.position = { x: 0, y: 0.5, z: 0 };
     gameState.ball.velocity = { x: 0, y: 0, z: 0 };
+    gameState.ball.spin = { x: 0, y: 0, z: 0 };
 
     io.emit('game-started');
 }
@@ -327,43 +369,77 @@ function checkWinCondition() {
 function resetBall() {
     gameState.ball.position = { x: 0, y: 0.5, z: 0 };
     gameState.ball.velocity = { x: 0, y: 0, z: 0 };
+    gameState.ball.spin = { x: 0, y: 0, z: 0 };
 }
 
 function updateBall(dt) {
     const ball = gameState.ball;
-    const gravity = -0.01;
-    const bounce = 0.1; // Rebond léger mais réaliste
-    const friction = 0.05;
-    const factor = 15;
-    
-    // Appliquer la gravité
-    ball.velocity.y += gravity * dt * factor * 150;
-    
-    // Mettre à jour la position
-    ball.position.x += ball.velocity.x * dt * factor * 15;
-    ball.position.y += ball.velocity.y * dt * factor * 2;
-    ball.position.z += ball.velocity.z * dt * factor * 15;
+    const vel = ball.velocity;
+    const spin = ball.spin;
 
-    // Collision avec le sol - rebond normal
-    if (ball.position.y <= 0.5) {
-        ball.position.y = 0.5;
-        ball.velocity.y = -ball.velocity.y * bounce;
-        ball.velocity.x *= friction * dt;
-        ball.velocity.z *= friction * dt;
+    const speed = Math.sqrt(vel.x * vel.x + vel.y * vel.y + vel.z * vel.z);
+    if (speed > 0.0001) {
+        const dragScale = BALL_PHYSICS.DRAG * speed * dt;
+        vel.x -= vel.x * dragScale;
+        vel.y -= vel.y * dragScale * 0.6; // Laisser un peu de portance verticale
+        vel.z -= vel.z * dragScale;
     }
-    
-    // Limites du terrain normales mais agrandies
-    if (Math.abs(ball.position.x) > 40) {
-        ball.velocity.x = -ball.velocity.x * bounce;
-        ball.position.x = Math.sign(ball.position.x) * 40;
+
+    // Magnus effect: spin x vitesse
+    const magnusFactor = BALL_PHYSICS.MAGNUS * dt;
+    const magnusX = (spin.y * vel.z - spin.z * vel.y) * magnusFactor;
+    const magnusY = (spin.z * vel.x - spin.x * vel.z) * magnusFactor;
+    const magnusZ = (spin.x * vel.y - spin.y * vel.x) * magnusFactor;
+    vel.x += magnusX;
+    vel.y += magnusY;
+    vel.z += magnusZ;
+
+    vel.y += GRAVITY * dt;
+
+    ball.position.x += vel.x * dt;
+    ball.position.y += vel.y * dt;
+    ball.position.z += vel.z * dt;
+
+    const groundLevel = BALL_RADIUS;
+    if (ball.position.y <= groundLevel) {
+        ball.position.y = groundLevel;
+        if (vel.y < 0) {
+            vel.y = -vel.y * BALL_PHYSICS.BOUNCE;
+        }
+
+        vel.x *= Math.max(0, 1 - BALL_PHYSICS.GROUND_FRICTION * dt);
+        vel.z *= Math.max(0, 1 - BALL_PHYSICS.GROUND_FRICTION * dt);
     }
-    
-    if (Math.abs(ball.position.z) > 25) {
-        ball.velocity.z = -ball.velocity.z * bounce;
-        ball.position.z = Math.sign(ball.position.z) * 25;
+
+    // Roulement: amortir progressivement quand le ballon glisse
+    if (ball.position.y <= groundLevel + 0.05 && Math.abs(vel.y) < 0.2) {
+        vel.x *= Math.max(0, 1 - BALL_PHYSICS.ROLL_DRAG * dt);
+        vel.z *= Math.max(0, 1 - BALL_PHYSICS.ROLL_DRAG * dt);
     }
-    
-    // Vérifier les buts
+
+    if (ball.position.y < groundLevel) {
+        ball.position.y = groundLevel;
+    }
+
+    if (Math.abs(ball.position.x) > FIELD_HALF_WIDTH) {
+        ball.position.x = Math.sign(ball.position.x) * FIELD_HALF_WIDTH;
+        vel.x = -vel.x * BALL_PHYSICS.BOUNCE;
+    }
+
+    if (Math.abs(ball.position.z) > FIELD_HALF_LENGTH) {
+        ball.position.z = Math.sign(ball.position.z) * FIELD_HALF_LENGTH;
+        vel.z = -vel.z * BALL_PHYSICS.BOUNCE;
+    }
+
+    limitPlanarVelocity(vel, BALL_PHYSICS.MAX_SPEED);
+    vel.y = clamp(vel.y, -BALL_PHYSICS.MAX_VERTICAL_SPEED, BALL_PHYSICS.MAX_VERTICAL_SPEED);
+
+    const spinDecay = Math.exp(-BALL_PHYSICS.SPIN_DECAY * dt);
+    spin.x *= spinDecay;
+    spin.y *= spinDecay;
+    spin.z *= spinDecay;
+    limitVector(spin, BALL_PHYSICS.MAX_SPIN);
+
     checkGoal();
 }
 
@@ -378,17 +454,30 @@ function updatePlayers(dt) {
         );
         
         if (ballDistance < 1.5 && !player.isKnockedOut) {
-            // Kick normal avec plus de puissance
-            const kickForce = 15; // Force augmentée mais raisonnable
-            const dx = gameState.ball.position.x - player.position.x;
-            const dz = gameState.ball.position.z - player.position.z;
-            const norm = Math.sqrt(dx * dx + dz * dz);
-            
-            if (norm > 0) {
-                gameState.ball.velocity.x += (dx / norm) * kickForce * dt;
-                gameState.ball.velocity.z += (dz / norm) * kickForce * dt;
-                gameState.ball.velocity.y += 3;
-            }
+            const ballState = gameState.ball;
+            const dx = ballState.position.x - player.position.x;
+            const dz = ballState.position.z - player.position.z;
+            const norm = Math.sqrt(dx * dx + dz * dz) || 1;
+            const direction = { x: dx / norm, z: dz / norm };
+
+            const playerSpeed = Math.hypot(player.velocity.x, player.velocity.z);
+            const baseKick = 25;
+            const speedBonus = clamp(playerSpeed * 0.35, 0, 8);
+            const kickPower = baseKick + speedBonus;
+
+            ballState.velocity.x += direction.x * kickPower;
+            ballState.velocity.z += direction.z * kickPower;
+            ballState.velocity.y = Math.max(ballState.velocity.y, 4 + speedBonus * 0.6);
+
+            const tangent = { x: -direction.z, z: direction.x };
+            const lateralComponent = player.velocity.x * tangent.x + player.velocity.z * tangent.z;
+            const forwardComponent = player.velocity.x * direction.x + player.velocity.z * direction.z;
+
+            ballState.spin.y += clamp(lateralComponent * 2.2, -BALL_PHYSICS.MAX_SPIN, BALL_PHYSICS.MAX_SPIN);
+            ballState.spin.x += clamp(-forwardComponent * 1.2, -BALL_PHYSICS.MAX_SPIN, BALL_PHYSICS.MAX_SPIN);
+            limitVector(ballState.spin, BALL_PHYSICS.MAX_SPIN);
+
+            limitPlanarVelocity(ballState.velocity, BALL_PHYSICS.MAX_SPEED);
         }
     });
 }

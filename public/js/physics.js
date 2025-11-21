@@ -5,6 +5,19 @@ class PhysicsManager {
         this.bodies = new Map(); // Map des corps physiques
         this.ballBody = null;
         this.playerBodies = new Map();
+        this.ballSettings = {
+            radius: 0.5,
+            mass: 0.43,
+            drag: 0.52,
+            magnus: 18,
+            spinDecay: 1.5,
+            bounce: 0.42,
+            surfaceDrag: 8.5,
+            rollDrag: 2.6,
+            maxSpeed: 44,
+            maxVerticalSpeed: 14
+        };
+        this.tmpVec = null;
         
         this.init();
     }
@@ -15,6 +28,8 @@ class PhysicsManager {
             console.error('❌ Cannon.js n\'est pas chargé !');
             throw new Error('Cannon.js is required but not loaded');
         }
+
+        this.tmpVec = new CANNON.Vec3();
 
         // Créer le monde physique OPTIMISÉ pour hautes vitesses
         this.world = new CANNON.World();
@@ -35,7 +50,6 @@ class PhysicsManager {
         // Murs invisibles pour les limites du terrain
         this.createFieldBounds();
         
-        console.log('⚡ Système physique initialisé avec Cannon.js');
     }
 
     createMaterials() {
@@ -116,8 +130,6 @@ class PhysicsManager {
 
     createFieldBounds() {
         // TERRAIN OUVERT - Pas de murs physiques pour plus de liberté !
-        console.log('🌍 Terrain ouvert créé - pas de limites physiques');
-        
         // Seulement les poteaux de but pour marquer les zones
         this.createGoalPosts();
     }
@@ -160,15 +172,15 @@ class PhysicsManager {
         const ballShape = new CANNON.Sphere(ballRadius);
         
         this.ballBody = new CANNON.Body({ 
-            mass: 1,
+            mass: this.ballSettings.mass,
             material: this.ballMaterial 
         });
         this.ballBody.addShape(ballShape);
         this.ballBody.position.set(position.x, position.y, position.z);
         
-        // Amortissement MAXIMUM ABSOLU pour clouer le ballon au sol
-        this.ballBody.linearDamping = 0.99; // EXTRÊME : freine presque totalement
-        this.ballBody.angularDamping = 0.95; // EXTRÊME : freine la rotation au maximum
+        // Amortissement léger uniquement pour filtrer les oscillations
+        this.ballBody.linearDamping = 0.02;
+        this.ballBody.angularDamping = 0.01;
         
         this.world.add(this.ballBody);
         return this.ballBody;
@@ -284,7 +296,7 @@ class PhysicsManager {
         });
     }
 
-    kickBall(playerId, direction, force = 1000) { // Force optimisée pour rester au sol
+    kickBall(playerId, direction, force = 25) { // Force adaptée à la nouvelle physique
         const playerBody = this.playerBodies.get(playerId);
         if (!playerBody || !this.ballBody) return;
 
@@ -296,12 +308,17 @@ class PhysicsManager {
         const kickRange = 1.5; // Portée légèrement augmentée
         
         if (distance <= kickRange) {
-            const kickDirection = new CANNON.Vec3(direction.x, 0.01, direction.z); // Trajectoire rase
+            const kickDirection = new CANNON.Vec3(direction.x, 0.05, direction.z);
             kickDirection.normalize();
-            
-            // Appliquer l'impulsion au ballon - force réduite pour éviter les vols
-            this.ballBody.applyImpulse(kickDirection.scale(force), ballPos);
-            
+            const spinDirection = kickDirection.clone();
+            const impulse = kickDirection.scale(force);
+            this.ballBody.applyImpulse(impulse, ballPos);
+
+            // Ajouter un spin proportionnel à la direction latérale pour retrouver l'effet Magnus local
+            const spinMultiplier = force * 0.12;
+            this.ballBody.angularVelocity.x += -spinDirection.z * spinMultiplier;
+            this.ballBody.angularVelocity.z += spinDirection.x * spinMultiplier;
+
             return true;
         }
         
@@ -348,43 +365,108 @@ class PhysicsManager {
     }
 
     update(deltaTime) {
-        // Mettre à jour le monde physique
-        this.world.step(deltaTime);
-        
-        // Maintenir les joueurs debout (empêcher les chutes)
+        if (!this.world) {
+            return;
+        }
+
+        const clampedDt = Math.min(Math.max(deltaTime, 1 / 120), 1 / 30);
+        this.world.step(clampedDt);
+        this.applyBallAerodynamics(clampedDt);
+        this.keepPlayersStable();
+        this.constrainBall(clampedDt);
+    }
+
+    applyBallAerodynamics(deltaTime) {
+        if (!this.ballBody) {
+            return;
+        }
+
+        const velocity = this.ballBody.velocity;
+        const omega = this.ballBody.angularVelocity;
+        const speed = velocity.length();
+
+        if (speed > 0.01) {
+            const drag = this.ballSettings.drag * speed;
+            const dragForce = this.tmpVec || new CANNON.Vec3();
+            dragForce.set(
+                -velocity.x * drag,
+                -velocity.y * drag * 0.6,
+                -velocity.z * drag
+            );
+            this.ballBody.applyForce(dragForce, this.ballBody.position);
+        }
+
+        const magnusForce = new CANNON.Vec3(
+            omega.y * velocity.z - omega.z * velocity.y,
+            omega.z * velocity.x - omega.x * velocity.z,
+            omega.x * velocity.y - omega.y * velocity.x
+        );
+        magnusForce.x *= this.ballSettings.magnus;
+        magnusForce.y *= this.ballSettings.magnus;
+        magnusForce.z *= this.ballSettings.magnus;
+        this.ballBody.applyForce(magnusForce, this.ballBody.position);
+
+        const decay = Math.exp(-this.ballSettings.spinDecay * deltaTime);
+        this.ballBody.angularVelocity.x *= decay;
+        this.ballBody.angularVelocity.y *= decay;
+        this.ballBody.angularVelocity.z *= decay;
+    }
+
+    keepPlayersStable() {
         this.playerBodies.forEach(body => {
-            // S'assurer que le joueur reste à la bonne hauteur
             if (body.position.y < 1) {
                 body.position.y = 1;
                 body.velocity.y = Math.max(0, body.velocity.y);
             }
-            
-            // Empêcher les rotations excessives
             body.quaternion.set(0, 0, 0, 1);
         });
-        
-        // CONTRAINTE EXTRÊME : BALLON COMPLÈTEMENT CLOUÉ AU SOL
-        if (this.ballBody) {
-            // FORCER le ballon à ne JAMAIS dépasser 0.505 (saut de 0.005 max = 100x moins haut)
-            if (this.ballBody.position.y > 0.505) {
-                this.ballBody.position.y = 0.505; // CLOUÉ au sol
+    }
+
+    constrainBall(deltaTime) {
+        if (!this.ballBody) {
+            return;
+        }
+
+        const radius = this.ballSettings.radius;
+        if (this.ballBody.position.y < radius) {
+            this.ballBody.position.y = radius;
+            if (this.ballBody.velocity.y < 0) {
+                this.ballBody.velocity.y = -this.ballBody.velocity.y * this.ballSettings.bounce;
             }
-            
-            // ÉLIMINER TOTALEMENT toute vélocité verticale > 0.01 (100x moins)
-            if (this.ballBody.velocity.y > 0.01) {
-                this.ballBody.velocity.y = 0; // ZÉRO saut
-            }
-            
-            // Empêcher même les micro-rebonds
-            if (this.ballBody.velocity.y > 0) {
-                this.ballBody.velocity.y *= 0.01; // Diviser par 100
-            }
-            
-            // Position minimale stricte
-            if (this.ballBody.position.y < 0.5) {
-                this.ballBody.position.y = 0.5;
-                this.ballBody.velocity.y = 0;
-            }
+        }
+
+        const nearGround = this.ballBody.position.y <= radius + 0.05;
+        if (nearGround && Math.abs(this.ballBody.velocity.y) < 0.2) {
+            const factor = Math.max(0, 1 - this.ballSettings.surfaceDrag * deltaTime);
+            this.ballBody.velocity.x *= factor;
+            this.ballBody.velocity.z *= factor;
+        } else if (nearGround) {
+            const rollFactor = Math.max(0, 1 - this.ballSettings.rollDrag * deltaTime);
+            this.ballBody.velocity.x *= rollFactor;
+            this.ballBody.velocity.z *= rollFactor;
+        }
+
+        const planarSpeed = Math.hypot(this.ballBody.velocity.x, this.ballBody.velocity.z);
+        if (planarSpeed > this.ballSettings.maxSpeed) {
+            const scale = this.ballSettings.maxSpeed / planarSpeed;
+            this.ballBody.velocity.x *= scale;
+            this.ballBody.velocity.z *= scale;
+        }
+
+        this.ballBody.velocity.y = Math.max(
+            -this.ballSettings.maxVerticalSpeed,
+            Math.min(this.ballSettings.maxVerticalSpeed, this.ballBody.velocity.y)
+        );
+
+        const limitX = 40;
+        const limitZ = 25;
+        if (Math.abs(this.ballBody.position.x) > limitX) {
+            this.ballBody.position.x = Math.sign(this.ballBody.position.x) * limitX;
+            this.ballBody.velocity.x = -this.ballBody.velocity.x * this.ballSettings.bounce;
+        }
+        if (Math.abs(this.ballBody.position.z) > limitZ) {
+            this.ballBody.position.z = Math.sign(this.ballBody.position.z) * limitZ;
+            this.ballBody.velocity.z = -this.ballBody.velocity.z * this.ballSettings.bounce;
         }
     }
 
@@ -411,36 +493,6 @@ class PhysicsManager {
             y: this.ballBody.velocity.y,
             z: this.ballBody.velocity.z
         } : null;
-    }
-
-    // Raycasting pour détecter les objets
-    raycast(from, to) {
-        const raycastResult = new CANNON.RaycastResult();
-        this.world.rayTest(
-            new CANNON.Vec3(from.x, from.y, from.z),
-            new CANNON.Vec3(to.x, to.y, to.z),
-            raycastResult
-        );
-        
-        return raycastResult.hasHit ? {
-            hit: true,
-            point: raycastResult.hitPointWorld,
-            body: raycastResult.body,
-            distance: raycastResult.distance
-        } : { hit: false };
-    }
-
-    // Debug: afficher les corps physiques en wireframe
-    addDebugVisualization(scene) {
-        if (typeof CannonDebugRenderer !== 'undefined') {
-            this.debugRenderer = new CannonDebugRenderer(scene, this.world);
-        }
-    }
-
-    updateDebugVisualization() {
-        if (this.debugRenderer) {
-            this.debugRenderer.update();
-        }
     }
 }
 

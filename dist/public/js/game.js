@@ -89,7 +89,7 @@ class SoccerBoxGame {
         this.scene.add(this.terrain);
         this.createFieldLines();
     }
-    createFieldLines() {
+        createFieldLines() {
         const lineMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
         const lineWidth = 0.2;
         const lineHeight = 0.01;
@@ -103,45 +103,45 @@ class SoccerBoxGame {
         circle.rotation.x = -Math.PI / 2;
         circle.position.y = lineHeight;
         this.scene.add(circle);
-        [-20, 20].forEach(z => {
+        [-19, 19].forEach(z => {
             const goalLineGeometry = new THREE.PlaneGeometry(30, lineWidth);
             const goalLine = new THREE.Mesh(goalLineGeometry, lineMaterial);
             goalLine.rotation.x = -Math.PI / 2;
             goalLine.position.set(0, lineHeight, z);
             this.scene.add(goalLine);
         });
-        [-20, 20].forEach(z => {
+        [-19, 19].forEach(z => {
             const penaltyAreaGeometry = new THREE.EdgesGeometry(
-                new THREE.BoxGeometry(30, 0, 12) 
+                new THREE.BoxGeometry(30, 0, 12)
             );
             const penaltyAreaMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
             const penaltyArea = new THREE.LineSegments(penaltyAreaGeometry, penaltyAreaMaterial);
-            penaltyArea.position.set(0, lineHeight, z > 0 ? 19 : -19); 
+            penaltyArea.position.set(0, lineHeight, z > 0 ? 18 : -18);
             this.scene.add(penaltyArea);
         });
     }
     createFieldBorders() {
         const borderMaterial = new THREE.MeshLambertMaterial({ color: 0x8B4513 });
-        const sideGeometry = new THREE.BoxGeometry(50, 2, 1);
+        const sideGeometry = new THREE.BoxGeometry(80, 2, 1);
         const topBorder = new THREE.Mesh(sideGeometry, borderMaterial);
-        topBorder.position.set(0, 1, 15.5);
+        topBorder.position.set(0, 1, 25.5); 
         topBorder.castShadow = true;
         this.scene.add(topBorder);
         const bottomBorder = new THREE.Mesh(sideGeometry, borderMaterial);
-        bottomBorder.position.set(0, 1, -15.5);
+        bottomBorder.position.set(0, 1, -25.5); 
         bottomBorder.castShadow = true;
         this.scene.add(bottomBorder);
-        const endGeometry = new THREE.BoxGeometry(1, 2, 30);
+        const endGeometry = new THREE.BoxGeometry(1, 2, 50);
         const leftBorder = new THREE.Mesh(endGeometry, borderMaterial);
-        leftBorder.position.set(-25.5, 1, 0);
+        leftBorder.position.set(-40.5, 1, 0); 
         leftBorder.castShadow = true;
         this.scene.add(leftBorder);
         const rightBorder = new THREE.Mesh(endGeometry, borderMaterial);
-        rightBorder.position.set(25.5, 1, 0);
+        rightBorder.position.set(40.5, 1, 0); 
         rightBorder.castShadow = true;
         this.scene.add(rightBorder);
     }
-    createGoals() {
+        createGoals() {
         const goalMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
         const netMaterial = new THREE.MeshBasicMaterial({ 
             color: 0x888888, 
@@ -150,8 +150,8 @@ class SoccerBoxGame {
             opacity: 0.7
         });
         const goalPositions = [
-            { z: -25, team: 'blue' },
-            { z: 25, team: 'red' }
+            { z: -24, team: 'blue' },   
+            { z: 24, team: 'red' }      
         ];
         goalPositions.forEach(goal => {
             const goalGroup = new THREE.Group();
@@ -174,6 +174,13 @@ class SoccerBoxGame {
             const net = new THREE.Mesh(netGeometry, netMaterial);
             net.position.set(0, 2, goal.z + (goal.z > 0 ? 1 : -1));
             goalGroup.add(net);
+            const goalBlockerMaterial = new THREE.MeshBasicMaterial({ 
+                visible: false 
+            });
+            const goalBlockerGeometry = new THREE.BoxGeometry(6, 4, 0.5);
+            const goalBlocker = new THREE.Mesh(goalBlockerGeometry, goalBlockerMaterial);
+            goalBlocker.position.set(0, 2, goal.z);
+            goalGroup.add(goalBlocker);
             this.goals.push({
                 team: goal.team,
                 position: goal.z,
@@ -282,15 +289,6 @@ class SoccerBoxGame {
         const rightEye = new THREE.Mesh(eyeGeometry, eyeMaterial);
         rightEye.position.set(0.15, 2.65, 0.35);
         playerGroup.add(rightEye);
-        const helmetGeometry = new THREE.SphereGeometry(0.47, 16, 8, 0, Math.PI * 2, 0, Math.PI * 0.7);
-        const helmetMaterial = new THREE.MeshPhongMaterial({ 
-            color: colors.accent,
-            transparent: true,
-            opacity: 0.7
-        });
-        const helmet = new THREE.Mesh(helmetGeometry, helmetMaterial);
-        helmet.position.y = 2.6;
-        playerGroup.add(helmet);
         const shoulderGeometry = new THREE.SphereGeometry(0.28, 16, 12);
         shoulderGeometry.scale(1.2, 0.8, 1); 
         const shoulderMaterial = new THREE.MeshPhongMaterial({ 
@@ -331,8 +329,8 @@ class SoccerBoxGame {
                 rightElbow.position.set(0.65, 1.0, 0); 
         rightElbow.castShadow = true;
         playerGroup.add(rightElbow);
-        const gloveGeometry = new THREE.SphereGeometry(0.22, 12, 8);
-                gloveGeometry.scale(1.1, 0.8, 1.2); 
+        const gloveGeometry = new THREE.SphereGeometry(0.24, 12, 8);
+                gloveGeometry.scale(2.1, 0.8, 1.2); 
         const gloveMaterial = new THREE.MeshPhongMaterial({ 
             color: 0xDC143C,
             shininess: 50
@@ -434,7 +432,6 @@ class SoccerBoxGame {
             leftLeg: leftLeg,
             rightLeg: rightLeg,
             aura: aura,
-            helmet: helmet,
             playerId: playerData.id,
             team: playerData.team,
             colors: colors,
@@ -612,10 +609,6 @@ class SoccerBoxGame {
             const rightLegPhase = Math.sin(walkCycle + Math.PI);
             leftLeg.rotation.x = leftLegPhase * baseSpeed * 20;
             rightLeg.rotation.x = rightLegPhase * baseSpeed * 20;
-            leftArm.rotation.x = -0.3; 
-            rightArm.rotation.x = -0.3; 
-            leftArm.rotation.z = 0.2;   
-            rightArm.rotation.z = -0.2; 
             torso.rotation.z = Math.sin(walkCycle * 0.5) * baseSpeed * 2;
             torso.rotation.x = Math.sin(walkCycle) * baseSpeed * 1;
             head.rotation.y = Math.sin(walkCycle * 0.3) * baseSpeed * 3;
@@ -636,107 +629,36 @@ class SoccerBoxGame {
         }
     }
     animatePlayerPunch(playerGroup, isLeftPunch = true) {
-        if (!playerGroup.userData.animations) return;
-        const { leftArm, rightArm, torso, head } = playerGroup.userData.animations;
-        const punchingArm = isLeftPunch ? leftArm : rightArm;
-        const otherArm = isLeftPunch ? rightArm : leftArm;
+        if (!playerGroup.userData.animations) {
+            console.warn("⚠️ Pas d'animations disponibles pour ce joueur");
+            return;
+        }
+        const { torso, head, leftArm, rightArm, leftLeg, rightLeg } = playerGroup.userData.animations;
+        const time = Date.now() * 0.001;
         const guardPosition = -0.3;
         const guardZ = isLeftPunch ? 0.2 : -0.2;
         const otherGuardZ = isLeftPunch ? -0.2 : 0.2;
-        new TWEEN.Tween(punchingArm.rotation)
-            .to({ x: 0.1, z: isLeftPunch ? -0.1 : 0.1 }, 120) 
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .chain(
-                new TWEEN.Tween(punchingArm.rotation)
-                    .to({ x: guardPosition, z: guardZ }, 200)
-                    .easing(TWEEN.Easing.Back.Out)
-            )
-            .start();
-        new TWEEN.Tween(otherArm.rotation)
-            .to({ x: guardPosition - 0.1, z: otherGuardZ + (isLeftPunch ? -0.1 : 0.1) }, 120)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .chain(
-                new TWEEN.Tween(otherArm.rotation)
-                    .to({ x: guardPosition, z: otherGuardZ }, 200)
-                    .easing(TWEEN.Easing.Back.Out)
-            )
-            .start();
-        const originalTorsoRotation = torso.rotation.y;
-        new TWEEN.Tween(torso.rotation)
-            .to({ y: isLeftPunch ? -0.4 : 0.4 }, 120)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .chain(
-                new TWEEN.Tween(torso.rotation)
-                    .to({ y: originalTorsoRotation }, 250)
-                    .easing(TWEEN.Easing.Back.Out)
-            )
-            .start();
-        const originalHeadRotation = head.rotation.y;
-        new TWEEN.Tween(head.rotation)
-            .to({ y: isLeftPunch ? -0.2 : 0.2 }, 120)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .chain(
-                new TWEEN.Tween(head.rotation)
-                    .to({ y: originalHeadRotation }, 250)
-                    .easing(TWEEN.Easing.Back.Out)
-            )
-            .start();
-    }
-    animatePlayerKick(playerGroup, isLeftKick = true) {
-        if (!playerGroup.userData.animations) return;
-        const { leftLeg, rightLeg, leftArm, rightArm, torso } = playerGroup.userData.animations;
-        const leg = isLeftKick ? leftLeg : rightLeg;
-        const oppositeArm = isLeftKick ? rightArm : leftArm; 
-        const sameArm = isLeftKick ? leftArm : rightArm;
-        const originalLegRotation = leg.rotation.x;
-        const originalOppositeArmRotation = oppositeArm.rotation.x;
-        const originalSameArmRotation = sameArm.rotation.x;
-        const originalTorsoRotation = torso.rotation.y;
-        new TWEEN.Tween(leg.rotation)
-            .to({ x: Math.PI * 0.3 }, 200)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .chain(
-                new TWEEN.Tween(leg.rotation)
-                    .to({ x: -Math.PI * 0.2 }, 100)
-                    .easing(TWEEN.Easing.Quadratic.In)
-                    .chain(
-                        new TWEEN.Tween(leg.rotation)
-                            .to({ x: originalLegRotation }, 300)
-                            .easing(TWEEN.Easing.Back.Out)
-                    )
-            )
-            .start();
-        new TWEEN.Tween(oppositeArm.rotation)
-            .to({ x: -Math.PI * 0.4, z: isLeftKick ? -0.3 : 0.3 }, 200)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .chain(
-                new TWEEN.Tween(oppositeArm.rotation)
-                    .to({ x: originalOppositeArmRotation, z: 0 }, 400)
-                    .easing(TWEEN.Easing.Back.Out)
-            )
-            .start();
-        new TWEEN.Tween(sameArm.rotation)
-            .to({ x: Math.PI * 0.1, z: isLeftKick ? 0.2 : -0.2 }, 200)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .chain(
-                new TWEEN.Tween(sameArm.rotation)
-                    .to({ x: originalSameArmRotation, z: 0 }, 400)
-                    .easing(TWEEN.Easing.Back.Out)
-            )
-            .start();
-        new TWEEN.Tween(torso.rotation)
-            .to({ y: isLeftKick ? 0.2 : -0.2 }, 150)
-            .easing(TWEEN.Easing.Quadratic.Out)
-            .chain(
-                new TWEEN.Tween(torso.rotation)
-                    .to({ y: originalTorsoRotation }, 350)
-                    .easing(TWEEN.Easing.Back.Out)
-            )
-            .start();
+        const punchTime = time + 0.1 * 15; 
+        const punchPhase = Math.sin(punchTime);
+        const punchIntensity = 1; 
+        if (isLeftPunch) {
+            leftArm.rotation.x = guardPosition + (punchIntensity); 
+            leftArm.rotation.z = guardZ + (punchIntensity); 
+            leftArm.rotation.y = guardZ + (punchIntensity); 
+            rightArm.rotation.x = guardPosition - (punchIntensity * 0.1);
+            rightArm.rotation.z = otherGuardZ + (punchIntensity * -0.1);
+        } else {
+            rightArm.rotation.x = guardPosition + (punchIntensity * 1); 
+            rightArm.rotation.z = guardZ + (punchIntensity * 0.3); 
+            leftArm.rotation.x = guardPosition - (punchIntensity * 0.1);
+            leftArm.rotation.z = otherGuardZ + (punchIntensity * 0.1);
+        }
+        torso.rotation.y = (isLeftPunch ? -0.4 : 0.4) * punchIntensity;
+        head.rotation.y = (isLeftPunch ? -0.2 : 0.2) * punchIntensity;
     }
     animatePlayerCelebration(playerGroup) {
         if (!playerGroup.userData.animations) return;
-        const { torso, head, leftArm, rightArm } = playerGroup.userData.animations;
+        const { torso, head, leftArm, rightArm, leftLeg, rightLeg } = playerGroup.userData.animations;
         new TWEEN.Tween(leftArm.rotation)
             .to({ x: -Math.PI * 0.8, z: Math.PI * 0.3 }, 500)
             .easing(TWEEN.Easing.Back.Out)
@@ -811,10 +733,6 @@ class SoccerBoxGame {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
                 return;
             }
-            const loginScreen = document.getElementById('loginScreen');
-            if (loginScreen && !loginScreen.classList.contains('hidden')) {
-                return;
-            }
             this.keys[e.code] = false;
             e.preventDefault();
         });
@@ -850,33 +768,25 @@ class SoccerBoxGame {
                 forward: backwardPressed,   
                 backward: forwardPressed,   
                 left: rightPressed,         
-                right: leftPressed          
+                right: leftPressed,          
+                shift: this.keys['ShiftLeft'] || this.keys['ShiftRight'],
             };
         } else {
             movement = {
                 forward: forwardPressed,
                 backward: backwardPressed,
                 left: leftPressed,
-                right: rightPressed
+                right: rightPressed,
+                shift: this.keys['ShiftLeft'] || this.keys['ShiftRight'],
             };
         }
         const punch = this.keys['Space'] || this.mouseState.clicked;
-        const kick = this.keys['KeyF'] || this.mouseState.rightClicked;
         if (Object.values(movement).some(v => v)) {
             networkManager.sendPlayerMove(movement);
         }
         if (punch) {
             networkManager.sendPlayerPunch();
             this.animatePunch(this.localPlayerId);
-        }
-        if (kick) {
-            const localPlayer = this.players.get(this.localPlayerId);
-            if (localPlayer) {
-                this.animatePlayerKick(localPlayer, Math.random() > 0.5);
-            }
-            if (networkManager.sendPlayerKick) {
-                networkManager.sendPlayerKick();
-            }
         }
     }
     updateGameState(newGameState) {

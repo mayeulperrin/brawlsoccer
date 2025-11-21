@@ -105,7 +105,6 @@ class Player {
         if (this.health === 0) {
             this.knockout();
         }
-        // Envoyer la mise à jour de santé
         return this.health;
     }
 
@@ -182,9 +181,13 @@ io.on('connection', (socket) => {
         const player = gameState.players.get(socket.id);
         if (!player || player.isKnockedOut) return;
 
-        const { direction, running } = data;
-        const speed = running ? 15 : 10; // Vitesse rapide mais fluide
-        const factor = 0.6;
+        const { direction, rotation, running } = data;
+        const speed = running ? 25 : 13;
+        const factor = 1;
+
+        if (running) {
+            player.takeDamage(1);
+        }
         
         // Mouvement fluide avec vélocité - MÊMES contrôles pour tous
         if (direction.forward) player.velocity.z -= speed * factor;
@@ -202,7 +205,15 @@ io.on('connection', (socket) => {
 
         // Vérifier les collisions avec d'autres joueurs
         const punchRange = 3;
-        const punchDamage = 25;
+        let punchDamage = 20;
+
+        if (player.health <= 50) {
+            punchDamage = 25;
+        }
+
+        if (player.health <= 10) {
+            punchDamage = 50;
+        }
 
         gameState.players.forEach((target, targetId) => {
             if (targetId === socket.id || target.isKnockedOut) return;
@@ -322,7 +333,7 @@ function updateBall(dt) {
     const ball = gameState.ball;
     const gravity = -0.01;
     const bounce = 0.1; // Rebond léger mais réaliste
-    const friction = 0.10;
+    const friction = 0.05;
     const factor = 15;
     
     // Appliquer la gravité

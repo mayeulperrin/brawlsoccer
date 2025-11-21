@@ -1,4 +1,3 @@
-let diagnostic, uiManager, networkManager, mobileControls, game, physicsManager;
 function initializeGame() {
     try {
         diagnostic.logStep('Initialisation des managers', 'loading');

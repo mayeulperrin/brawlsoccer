@@ -63,10 +63,10 @@ class PhysicsManager {
             this.playerMaterial, 
             this.playerMaterial, 
             {
-                friction: 0.2,
-                restitution: 0.4,
-                contactEquationStiffness: 1e8,
-                contactEquationRelaxation: 3
+            friction: 0.1, 
+            restitution: 1.0, 
+            contactEquationStiffness: 1e9, 
+            contactEquationRelaxation: 2
             }
         );
         this.world.addContactMaterial(playerPlayerContact);
@@ -138,8 +138,8 @@ class PhysicsManager {
         playerBody.position.set(position.x, position.y, position.z);
         playerBody.fixedRotation = true;
         playerBody.updateMassProperties();
-        playerBody.linearDamping = 0.0; 
-        playerBody.angularDamping = 0.0; 
+        playerBody.linearDamping = 1; 
+        playerBody.angularDamping = 1; 
         this.world.add(playerBody);
         this.playerBodies.set(playerId, playerBody);
         return playerBody;

@@ -6,7 +6,7 @@ class NetworkManager {
         this.playerTeam = null;
         this.lastMovementSent = 0;
         this.movementBuffer = null;
-        this.movementCooldown = 10;
+        this.movementCooldown = 100;
         this.init();
     }
     init() {
@@ -128,7 +128,7 @@ class NetworkManager {
         const now = Date.now();
         if (now - this.lastMovementSent < this.movementCooldown) {
             this.movementBuffer = { movement, rotation };
-            // return;
+            return;
         }
         this.socket.emit('player-move', {
             direction: movement,
